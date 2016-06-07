@@ -236,7 +236,9 @@
                 }
             });
 
-            vm.Templates.iFrame.attr("src", vm.getListUrl()).load(function() {
+            vm.Templates.iFrame.attr("src", vm.getListUrl());
+
+            function afterIframeLoad() {
 
                 vm.Templates.modal.find(".loadingmessage").hide();
 
@@ -255,7 +257,18 @@
                     }, 300);
 
                 });
-            });
+            }
+
+            var iFrameTimer = setInterval(function () {
+                iframe = document.getElementById('hiddeniframe');
+                var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                // Check if loading is complete
+                if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
+                    afterIframeLoad();
+                    clearInterval(iFrameTimer);
+                    return;
+                }
+            }, 1000);
         };
         vm.init();
     }
