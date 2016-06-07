@@ -1,43 +1,40 @@
-(function parseTodaysSightings(userAlias) {
+(function parseTodaysSightings() {
 
     // This code is inserted via a bookmarklet to parse Todays Sighting in Species Gateway for twitchable species
     // Open https://artpoprtalen.se/mobile/sightings
     // Go to the province or municipality you wish to parse
     // Load the bookmarklet
-    // The species list for the userAlias based on the current municipality or province loads into a hidden iFrame
-    // An array of Taxonid from the species list are extracted from the hidden iFrame 
+    // The species list for the userAlias based on the current municipality or province are loaded 
+    // An array of Taxonid from the species list are extracted from the loaded species list
     // The species array are used to filter Todays Sighting for missing species
     function twitchViewModel () {
 
         var vm = this; 
-        vm.userAlias = userAlias;
-        vm.sightings = [];
 
-        vm.extractionIsActive = true;
+        vm.sightings = [];
+        vm.missingSpeciesArray = [];
+
+        // Loading sightings active?
+        vm.extractionIsActive = false;
         vm.extractionActivated = function(state) {
             vm.extractionIsActive = state;
             vm.Templates.modal.find(".loader").toggle(vm.extractionIsActive);
             return state;
         };
 
-        vm.missingSpeciesArray = [];
-
-        // Subscribe to changes on the sightings observable on the hist page
+        // Subscribe to changes of sightings (eg. loading new ones)
         vm.sightingSubscription = null;
-
-        vm.getQueryParameterByName = function(name, url) {
-            if (!url) url = window.location.href;
-            name = name.replace(/[\[\]]/g, "\\$&");
-            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        vm.toggleSightingSubscription = function(toggle) {
+            if (toggle) {
+                vm.sightingSubscription = window.viewModel.sightings.subscribe(function(newValue) {
+                    setTimeout(function() {
+                        vm.displaySightings();
+                    }, 300);
+                });
+            } else {
+                vm.sightingSubscription.dispose();
+            }
         }
-        
-        vm.email = vm.getQueryParameterByName("email", window.location.search);
-        console.log("email" + vm.email);
-        console.log("useralias" + vm.getQueryParameterByName("useralias", window.location.search));
 
         // HTML Templates and Styles
         vm.Templates = {};
@@ -45,7 +42,6 @@
         // Add some style to inserted elements
         vm.Templates.styles = $([
             "<style type='text/css'>",
-                "#hiddeniframe { position:absolute;left:-1000px;top:0px;}",
                 "#btnToggleTwitch { position: fixed; bottom:20px; left:20px; z-index:9999; }",
                 ".loader { height: 4px; width: 100%; position: relative; overflow: hidden; background-color: #ddd; }",
                 ".loader:before{ display: block; position: absolute; content: ''; left: -200px; width: 200px; height: 4px; background-color: #2980b9; animation: loading 2s linear infinite; }",
@@ -60,9 +56,6 @@
                 ".checkmark:after { content: ''; display: block; width: 3px; height: 6px; border: solid transparent; border-width: 0 2px 2px 0; transform: rotate(45deg); }",
             "</style>"
         ].join("\n")).appendTo(document.body);
-
-        // This iFrame is hidden and is used to load the species list
-        vm.Templates.iFrame = $("<iframe id='hiddeniframe' width='200' height='200'/>").appendTo(document.body);
 
         // The button used to show or hide to modal window
         vm.Templates.button = $('<button type="button" class="btn btn-success" id="btnToggleTwitch"><i class="icon-eye-open"></i></button>').click(function(e) {
@@ -83,6 +76,7 @@
                     '<div class="loadingmessage"><img src="//artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
                 '</div>',
                 '<div class="modal-footer">',
+                    '<a href="#" class="btn btn-small pull-left btn-settings"><i class="icon-cog"></i></a>',
                     '<a href="#" class="btn btn-small btn-email"><i class="icon-inbox"></i></a>',
                     '<a href="#" class="btn btn-small pull-right btn-abort"><i class="icon-pause"></i></a>',
                 '</div>',
@@ -90,11 +84,9 @@
         ].join("\n")).appendTo(document.body).modal("show").find("button.close").click(function() {
             // Closing the modal will clean upp DOM and subscription to knockout observeable
             vm.extractionActivated(false);
-            vm.sightingSubscription.dispose();
-            vm.Templates.iFrame.remove();
+            vm.toggleSightingSubscription(false);
             vm.Templates.styles.remove();
         }).end().find(".btn-abort").click(function(e) {
-            // Paus or play extraction
             e.preventDefault();
             var $btn = $(this);
             var currentState = vm.extractionIsActive;
@@ -102,9 +94,18 @@
             vm.extractionActivated(!currentState);
             if (!currentState) vm.pageForward();
         }).end().find(".btn-email").click(function(e) {
-            // Paus or play extraction
             e.preventDefault();
-            console.log(vm.email);
+            vm.extractionActivated(false);
+            vm.toggleSightingSubscription(false);
+            vm.Templates.modal.modal("hide");
+            $("#bookmarks").click();
+            setTimeout(function() {
+                console.log(localStorage.getItem("twitch-email"));
+                
+            }, 2000);
+        }).end().find(".btn-settings").click(function(e) {
+            e.preventDefault();
+            vm.showSettings();
         }).end();
 
         // The table used inside the modal to show extracted sighting
@@ -113,6 +114,35 @@
             console.log("Klickade på todayssightingid: " + $(this).data("todayssightingid"));
             vm.showSightingInfo($(this).data("todayssightingid"));
         }).appendTo(vm.Templates.modal.find(".modal-body"));
+
+        vm.Templates.settingsForm = $([
+            '<form>',
+                '<div class="form-group">',
+                    '<input type="text" class="form-control" id="input_useralias" placeholder="Användaralias">',
+                '</div>',
+                '<div class="form-group">',
+                    '<input type="email" class="form-control" id="input_email" placeholder="Epost">',
+                '</div>',
+                '<button type="submit" class="btn btn-primary">Spara</button>',
+            '</form>'
+        ].join("\n")).find(".btn-primary").click(function(e) {
+            // Paus or play extraction
+            e.preventDefault();
+            localStorage.setItem("twitch-useralias", vm.Templates.settingsForm.find("#input_useralias").val());
+            localStorage.setItem("twitch-email", vm.Templates.settingsForm.find("#input_email").val());
+            vm.Templates.settingsForm.hide();
+            vm.Templates.modal.find(".modal-footer").show();
+            vm.Templates.modal.find(".modal-title").html("<b>" + vm.Templates.modal.find("#extractedsightings tr:not(.divider)").length + "</b> fynd hittades");
+            vm.firstLoad();
+        }).end();
+
+        vm.showSettings = function() {
+            vm.Templates.modal.find(".modal-title").html("<b>Inställningar</b>");
+            vm.Templates.modal.find(".modal-footer").hide();
+            vm.Templates.modal.find(".modal-body").html(vm.Templates.settingsForm);
+            vm.Templates.settingsForm.find("#input_useralias").val(localStorage.getItem("twitch-useralias") || "");
+            vm.Templates.settingsForm.find("#input_email").val(localStorage.getItem("twitch-email") || "");
+        };
 
         // Pageing withing the host viewmodel. If at last page, go one day back until the end is reached
         vm.pageForward = function() {
@@ -133,7 +163,7 @@
                 window.viewModel.selectedAreaIsMunicipality() ? "Kommun" : "Landskap", 
                 window.viewModel.selectedAreaName(), 
                 "AnySite/OrderByTaxon/Asc", 
-                vm.userAlias
+                localStorage.getItem("twitch-useralias")
             ].join('/') + "?t=" + new Date().getTime();
         };
 
@@ -245,17 +275,8 @@
             }
         };
 
-        vm.init = function() {
-            window.viewModel.setPageSize(50);
-
-            $(document).keyup(function(e) {
-                if (e.keyCode == 27) { 
-                    vm.extractionActivated(false);
-                }
-            });
-
-            //vm.Templates.iFrame.attr("src", vm.getListUrl());
-            
+        vm.firstLoad = function() {
+            vm.extractionActivated(true);
             $.get(vm.getListUrl(), function( data ) {
                 vm.Templates.modal.find(".loadingmessage").hide();
 
@@ -264,15 +285,30 @@
                 }).get();
 
                 vm.displaySightings();
-                
-                // Subscribe to changes of sightings (eg. loading new ones)
-                vm.sightingSubscription = window.viewModel.sightings.subscribe(function(newValue) {
-                    setTimeout(function() {
-                        vm.displaySightings();
-                    }, 300);
-
-                });
+                vm.toggleSightingSubscription(true);
             });
+        };
+
+        vm.init = function() {
+            if (!window.viewModel.localStorageEnabled()) {
+                alert("Error! No local storage enabled...");
+                return false;
+            }
+
+            window.viewModel.setPageSize(50);
+
+            $(document).keyup(function(e) {
+                if (e.keyCode == 27) { 
+                    vm.extractionActivated(false);
+                }
+            });
+
+            if (localStorage.getItem('twitch-useralias') === null || localStorage.getItem('twitch-email') === null) {
+                vm.extractionActivated(false);
+                vm.showSettings();
+            } else {
+                vm.firstLoad();
+            }
         };
         vm.init();
     }
@@ -280,4 +316,4 @@
     window.twitchViewModel = new twitchViewModel();
     ko.applyBindings(window.viewModel, window.twitchViewModel.Templates.modal[0]);
 
-})("johans");
+})();
