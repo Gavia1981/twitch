@@ -243,6 +243,8 @@
                     return $(this).data("taxonid");
                 }).get();
 
+                vm.Templates.modal.append(vm.missingSpeciesArray.join("<br>"));
+
                 vm.displaySightings();
                 
                 // Subscribe to changes of sightings (eg. loading new ones)
