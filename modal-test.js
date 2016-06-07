@@ -243,7 +243,7 @@
                     return $(this).data("taxonid");
                 }).get();
 
-                vm.Templates.modal.append(vm.missingSpeciesArray.join("<br>"));
+                vm.Templates.modal.append(vm.Templates.iFrame.contents().find("h1"));
 
                 vm.displaySightings();
                 
