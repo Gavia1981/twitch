@@ -49,7 +49,7 @@
         ].join("\n")).appendTo(document.body);
 
         // This iFrame is hidden and is used to load the species list
-        vm.Templates.iFrame = $("<iframe id='hiddeniframe' />").appendTo(document.body);
+        vm.Templates.iFrame = $("<iframe id='hiddeniframe' width='200' height='200'/>").appendTo(document.body);
 
         // The button used to show or hide to modal window
         vm.Templates.button = $('<button type="button" class="btn btn-success" id="btnToggleTwitch"><i class="icon-eye-open"></i></button>').click(function(e) {
