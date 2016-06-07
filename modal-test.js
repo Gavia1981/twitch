@@ -25,6 +25,19 @@
         // Subscribe to changes on the sightings observable on the hist page
         vm.sightingSubscription = null;
 
+        vm.getQueryParameterByName = function(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+        
+        vm.email = vm.getQueryParameterByName("email", window.location.search);
+        console.log("email" + vm.email);
+        console.log("useralias" + vm.getQueryParameterByName("email", window.location.search));
 
         // HTML Templates and Styles
         vm.Templates = {};
@@ -70,6 +83,7 @@
                     '<div class="loadingmessage"><img src="//artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
                 '</div>',
                 '<div class="modal-footer">',
+                    '<a href="#" class="btn btn-small pull-right btn-email"><i class="icon-pause"></i></a>',
                     '<a href="#" class="btn btn-small pull-right btn-abort"><i class="icon-pause"></i></a>',
                 '</div>',
             '</div>'
@@ -107,7 +121,7 @@
                 vm.extractionActivated(false);
             }
         };
-
+        
         // The species list for the current area and userAlias used to extract taxonids from
         vm.getListUrl = function() {
             return [
