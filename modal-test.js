@@ -67,7 +67,7 @@
                 '</div>',
                 '<div class="loader"></div>',
                 '<div class="modal-body">',
-                    '<div class="loadingmessage"><img src="https://artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
+                    '<div class="loadingmessage"><img src="//artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
                 '</div>',
                 '<div class="modal-footer">',
                     '<a href="#" class="btn btn-small pull-right btn-abort"><i class="icon-pause"></i></a>',
@@ -111,7 +111,7 @@
         // The species list for the current area and userAlias used to extract taxonids from
         vm.getListUrl = function() {
             return [
-                "https://artportalen.se/List/Top/Species/F%C3%A5glar/Total", 
+                "//artportalen.se/List/Top/Species/F%C3%A5glar/Total", 
                 window.viewModel.selectedAreaIsMunicipality() ? "Kommun" : "Landskap", 
                 window.viewModel.selectedAreaName(), 
                 "AnySite/OrderByTaxon/Asc", 
