@@ -101,7 +101,7 @@
             $btn.find("i").toggleClass("icon-play icon-pause");
             vm.extractionActivated(!currentState);
             if (!currentState) vm.pageForward();
-        }).end().find(".btn-abort").click(function(e) {
+        }).end().find(".btn-email").click(function(e) {
             // Paus or play extraction
             e.preventDefault();
             console.log(vm.email);
