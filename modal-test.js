@@ -260,15 +260,10 @@
             }
 
             var iFrameTimer = setInterval(function () {
-                iframe = document.getElementById('hiddeniframe');
-                var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                // Check if loading is complete
-                if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
-                    afterIframeLoad();
-                    clearInterval(iFrameTimer);
-                    return;
-                }
-            }, 1000);
+                afterIframeLoad();
+                clearInterval(iFrameTimer);
+                return;
+            }, 10000);
         };
         vm.init();
     }
