@@ -32,7 +32,7 @@
         // Add some style to inserted elements
         vm.Templates.styles = $([
             "<style type='text/css'>",
-                "#hiddeniframe { position:absolute;left:-1000px;top:0px;visibility:hidden }",
+                "#hiddeniframe { position:absolute;left:-1000px;top:0px; }",
                 "#btnToggleTwitch { position: fixed; bottom:20px; left:20px; z-index:9999; }",
                 ".loader { height: 4px; width: 100%; position: relative; overflow: hidden; background-color: #ddd; }",
                 ".loader:before{ display: block; position: absolute; content: ''; left: -200px; width: 200px; height: 4px; background-color: #2980b9; animation: loading 2s linear infinite; }",
