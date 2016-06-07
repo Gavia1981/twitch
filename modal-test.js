@@ -239,16 +239,9 @@
             //vm.Templates.iFrame.attr("src", vm.getListUrl());
             
             $.get(vm.getListUrl(), function( data ) {
-                console.log(data);
-            });
-
-            function afterIframeLoad() {
-
                 vm.Templates.modal.find(".loadingmessage").hide();
 
-                vm.Templates.modal.find(".modal-body").append("Laddat innehåll");
-
-                vm.missingSpeciesArray = $(vm.Templates.iFrame).contents().find("span[data-taxonid]").map(function() {
+                vm.missingSpeciesArray = $(data).find("span[data-taxonid]").map(function() {
                     return $(this).data("taxonid");
                 }).get();
 
@@ -261,7 +254,12 @@
                     }, 300);
 
                 });
-            }
+            });
+
+
+
+
+
         };
         vm.init();
     }
