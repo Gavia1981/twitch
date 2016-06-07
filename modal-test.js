@@ -236,7 +236,11 @@
                 }
             });
 
-            vm.Templates.iFrame.attr("src", vm.getListUrl());
+            //vm.Templates.iFrame.attr("src", vm.getListUrl());
+            
+            $.get(vm.getListUrl(), function( data ) {
+                console.log(data);
+            });
 
             function afterIframeLoad() {
 
@@ -258,12 +262,6 @@
 
                 });
             }
-
-            var iFrameTimer = setInterval(function () {
-                afterIframeLoad();
-                clearInterval(iFrameTimer);
-                return;
-            }, 10000);
         };
         vm.init();
     }
