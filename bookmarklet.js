@@ -1,0 +1,1 @@
+javascript:(function()%7B%24.getScript(%22https%3A%2F%2Frawgit.com%2FGavia1981%2Ftwitch%2Fmaster%2Fmodal-test.js%22).done(function(%20script%2C%20textStatus%20)%20%7Bconsole.log(%20textStatus%20)%3B%7D).fail(function(%20jqxhr%2C%20settings%2C%20exception%20)%20%7Balert(%22Triggered%20ajaxError%20handler.%22)%3B%7D)%7D)()
