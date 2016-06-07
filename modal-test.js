@@ -37,7 +37,7 @@
         
         vm.email = vm.getQueryParameterByName("email", window.location.search);
         console.log("email" + vm.email);
-        console.log("useralias" + vm.getQueryParameterByName("email", window.location.search));
+        console.log("useralias" + vm.getQueryParameterByName("useralias", window.location.search));
 
         // HTML Templates and Styles
         vm.Templates = {};
