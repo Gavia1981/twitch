@@ -83,7 +83,7 @@
                     '<div class="loadingmessage"><img src="//artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
                 '</div>',
                 '<div class="modal-footer">',
-                    '<a href="#" class="btn btn-small pull-right btn-email"><i class="icon-pause"></i></a>',
+                    '<a href="#" class="btn btn-small btn-email"><i class="icon-inbox"></i></a>',
                     '<a href="#" class="btn btn-small pull-right btn-abort"><i class="icon-pause"></i></a>',
                 '</div>',
             '</div>'
@@ -101,6 +101,10 @@
             $btn.find("i").toggleClass("icon-play icon-pause");
             vm.extractionActivated(!currentState);
             if (!currentState) vm.pageForward();
+        }).end().find(".btn-abort").click(function(e) {
+            // Paus or play extraction
+            e.preventDefault();
+            console.log(vm.email);
         }).end();
 
         // The table used inside the modal to show extracted sighting
