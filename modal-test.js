@@ -32,6 +32,7 @@
         // Add some style to inserted elements
         vm.Templates.styles = $([
             "<style type='text/css'>",
+                "#hiddeniframe { position:absolute;left:-1000px;top:0px;visibility:hidden }",
                 "#btnToggleTwitch { position: fixed; bottom:20px; left:20px; z-index:9999; }",
                 ".loader { height: 4px; width: 100%; position: relative; overflow: hidden; background-color: #ddd; }",
                 ".loader:before{ display: block; position: absolute; content: ''; left: -200px; width: 200px; height: 4px; background-color: #2980b9; animation: loading 2s linear infinite; }",
@@ -48,7 +49,7 @@
         ].join("\n")).appendTo(document.body);
 
         // This iFrame is hidden and is used to load the species list
-        vm.Templates.iFrame = $("<iframe />").appendTo(document.body).hide();
+        vm.Templates.iFrame = $("<iframe id='hiddeniframe' />").appendTo(document.body);
 
         // The button used to show or hide to modal window
         vm.Templates.button = $('<button type="button" class="btn btn-success" id="btnToggleTwitch"><i class="icon-eye-open"></i></button>').click(function(e) {
@@ -242,8 +243,6 @@
                 vm.missingSpeciesArray = vm.Templates.iFrame.contents().find("span[data-taxonid]").map(function() {
                     return $(this).data("taxonid");
                 }).get();
-
-                vm.Templates.modal.append(vm.Templates.iFrame.contents().find("h1"));
 
                 vm.displaySightings();
                 
