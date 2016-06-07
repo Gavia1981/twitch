@@ -111,7 +111,7 @@
         // The species list for the current area and userAlias used to extract taxonids from
         vm.getListUrl = function() {
             return [
-                "https://artportalen.se/List/Top/Species/F%C3%A5glar/Total", 
+                "http://artportalen.se/List/Top/Species/F%C3%A5glar/Total", 
                 window.viewModel.selectedAreaIsMunicipality() ? "Kommun" : "Landskap", 
                 window.viewModel.selectedAreaName(), 
                 "AnySite/OrderByTaxon/Asc", 
