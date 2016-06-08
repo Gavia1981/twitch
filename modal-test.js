@@ -120,16 +120,12 @@
                 '<div class="form-group">',
                     '<input type="text" class="form-control" id="input_useralias" placeholder="Användaralias">',
                 '</div>',
-                '<div class="form-group">',
-                    '<input type="email" class="form-control" id="input_email" placeholder="Epost">',
-                '</div>',
                 '<button type="submit" class="btn btn-primary">Spara</button>',
             '</form>'
         ].join("\n")).find(".btn-primary").click(function(e) {
             // Paus or play extraction
             e.preventDefault();
             localStorage.setItem("twitch-useralias", vm.Templates.settingsForm.find("#input_useralias").val());
-            localStorage.setItem("twitch-email", vm.Templates.settingsForm.find("#input_email").val());
             vm.Templates.settingsForm.hide();
             vm.Templates.modal.find(".modal-footer").show();
             vm.Templates.modal.find(".modal-title").html("<b>" + vm.Templates.modal.find("#extractedsightings tr:not(.divider)").length + "</b> fynd hittades");
@@ -141,7 +137,6 @@
             vm.Templates.modal.find(".modal-footer").hide();
             vm.Templates.modal.find(".modal-body").html(vm.Templates.settingsForm);
             vm.Templates.settingsForm.find("#input_useralias").val(localStorage.getItem("twitch-useralias") || "");
-            vm.Templates.settingsForm.find("#input_email").val(localStorage.getItem("twitch-email") || "");
         };
 
         vm.exportSightings = function(exportAsHtml) {
@@ -337,7 +332,7 @@
                 }
             });
 
-            if (localStorage.getItem('twitch-useralias') === null || localStorage.getItem('twitch-email') === null) {
+            if (localStorage.getItem('twitch-useralias') === null) {
                 vm.extractionActivated(false);
                 vm.showSettings();
             } else {
