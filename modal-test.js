@@ -54,7 +54,7 @@
                 ".rowAdded .checkmark:after { border-color: #000; }",
                 ".checkmark { display: inline-block; margin: 2px 2px 1px; }",
                 ".checkmark:after { content: ''; display: block; width: 3px; height: 6px; border: solid transparent; border-width: 0 2px 2px 0; transform: rotate(45deg); }",
-                ".exportSightings { z-index: 9999; position: fixed; top: 0; right: 0; left: 0; bottom: 0; width: 100%; }",
+                ".exportSightings { z-index: 9999; position: fixed; top: 0; right: 0; left: 0; bottom: 0; width: 100%; background-color: #fff; }",
             "</style>"
         ].join("\n")).appendTo(document.body);
 
@@ -64,8 +64,6 @@
             $("#sightingInfoModal").modal('hide');
             vm.Templates.modal.modal("show");
         }).appendTo(document.body);
-
-        vm.Templates.exportSightings = $("<textarea class='exportSightings'/>");
 
         // The modal window for sightings
         vm.Templates.modal = $([
@@ -103,7 +101,7 @@
             vm.Templates.modal.modal("hide");
             $("#bookmarks").click();
             setTimeout(function() {
-                vm.exportSightings();
+                vm.exportSightings(true);
             }, 500);
         }).end().find(".btn-settings").click(function(e) {
             e.preventDefault();
@@ -146,21 +144,30 @@
             vm.Templates.settingsForm.find("#input_email").val(localStorage.getItem("twitch-email") || "");
         };
 
-        vm.exportSightings = function() {
+        vm.exportSightings = function(exportAsHtml) {
+
+            vm.Templates.exportSightings = exportAsHtml 
+                ? $("<div class='exportSightings'/>") 
+                : $("<textarea class='exportSightings'/>");
+
             var exportSightingsArray = [];
             $.each(window.viewModel.sightings(), function(index, sighting) {
                 exportSightingsArray.push([
-                    window.viewModel.renderTaxonName(sighting),
+                    exportAsHtml 
+                        ? "<b>" + window.viewModel.renderTaxonName(sighting) + "</b>" 
+                        : window.viewModel.renderTaxonName(sighting),
                     sighting.SightingPresentation,
                     $(sighting.SitePresentation + ', ' + sighting.RegionShortName).text(),
                     sighting.ObservedDatePresentation + ' - ' + sighting.TimePresentation,
                     $(sighting.Observers).text(),
-                    sighting.PublicComment,
+                    exportAsHtml 
+                        ? "<i>" + sighting.PublicComment + "</i>" 
+                        : sighting.PublicComment,
                     "https://artportalen.se/Sighting/" + sighting.SightingId
-                ].join("  |  "));
+                ].join(exportAsHtml ? " " : "  |  "));
             });
 
-            vm.Templates.exportSightings.val(exportSightingsArray.join("\n")).appendTo(document.body).select();
+            vm.Templates.exportSightings.val(exportSightingsArray.join(exportAsHtml ? "<br>" : "\n")).appendTo(document.body).select();
         };
 
         vm.sendEmail = function(mailBody) {
