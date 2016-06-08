@@ -54,6 +54,7 @@
                 ".rowAdded .checkmark:after { border-color: #000; }",
                 ".checkmark { display: inline-block; margin: 2px 2px 1px; }",
                 ".checkmark:after { content: ''; display: block; width: 3px; height: 6px; border: solid transparent; border-width: 0 2px 2px 0; transform: rotate(45deg); }",
+                ".exportSightings { z-index: 9999; position: fixed; top: 0; right: 0; left: 0; bottom: 0; width: 100%; }",
             "</style>"
         ].join("\n")).appendTo(document.body);
 
@@ -63,6 +64,8 @@
             $("#sightingInfoModal").modal('hide');
             vm.Templates.modal.modal("show");
         }).appendTo(document.body);
+
+        vm.Templates.exportSightings = $("<textarea class='exportSightings'/>");
 
         // The modal window for sightings
         vm.Templates.modal = $([
@@ -76,8 +79,8 @@
                     '<div class="loadingmessage"><img src="//artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
                 '</div>',
                 '<div class="modal-footer">',
-                    '<a href="#" class="btn btn-small pull-left btn-settings"><i class="icon-cog"></i></a>',
-                    '<a href="#" class="btn btn-small btn-email"><i class="icon-inbox"></i></a>',
+                    '<a href="#" class="btn btn-medium pull-left btn-settings"><i class="icon-cog"></i></a>',
+                    '<a href="#" class="btn btn-small btn-export"><i class="icon-inbox"></i></a>',
                     '<a href="#" class="btn btn-small pull-right btn-abort"><i class="icon-pause"></i></a>',
                 '</div>',
             '</div>'
@@ -93,16 +96,15 @@
             $btn.find("i").toggleClass("icon-play icon-pause");
             vm.extractionActivated(!currentState);
             if (!currentState) vm.pageForward();
-        }).end().find(".btn-email").click(function(e) {
+        }).end().find(".btn-export").click(function(e) {
             e.preventDefault();
             vm.extractionActivated(false);
             vm.toggleSightingSubscription(false);
             vm.Templates.modal.modal("hide");
             $("#bookmarks").click();
             setTimeout(function() {
-                console.log(localStorage.getItem("twitch-email"));
-                
-            }, 2000);
+                vm.exportSightings();
+            }, 500);
         }).end().find(".btn-settings").click(function(e) {
             e.preventDefault();
             vm.showSettings();
@@ -142,6 +144,28 @@
             vm.Templates.modal.find(".modal-body").html(vm.Templates.settingsForm);
             vm.Templates.settingsForm.find("#input_useralias").val(localStorage.getItem("twitch-useralias") || "");
             vm.Templates.settingsForm.find("#input_email").val(localStorage.getItem("twitch-email") || "");
+        };
+
+        vm.exportSightings = function() {
+            var exportSightingsArray = [];
+            $.each(window.viewModel.sightings(), function(index, sighting) {
+                exportSightingsArray.push([
+                    window.viewModel.renderTaxonName(sighting),
+                    sighting.SightingPresentation,
+                    $(sighting.SitePresentation + ', ' + sighting.RegionShortName).text(),
+                    sighting.ObservedDatePresentation + ' - ' + sighting.TimePresentation,
+                    $(sighting.Observers).text(),
+                    sighting.PublicComment,
+                    "https://artportalen.se/Sighting/" + sighting.SightingId
+                ].join("  |  "));
+            });
+
+            vm.Templates.exportSightings.val(exportSightingsArray.join("\n")).appendTo(document.body).select();
+        };
+
+        vm.sendEmail = function(mailBody) {
+            var mailToLink = "mailto:" + localStorage.getItem("twitch-email") + "?body=" + encodeURIComponent(mailBody);
+            window.location.href = mailToLink;
         };
 
         // Pageing withing the host viewmodel. If at last page, go one day back until the end is reached
