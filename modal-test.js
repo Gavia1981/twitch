@@ -145,11 +145,7 @@
         };
 
         vm.exportSightings = function(exportAsHtml) {
-
-            vm.Templates.exportSightings = exportAsHtml 
-                ? $("<div class='exportSightings'/>") 
-                : $("<textarea class='exportSightings'/>");
-
+            
             var exportSightingsArray = [];
             $.each(window.viewModel.sightings(), function(index, sighting) {
                 exportSightingsArray.push([
@@ -167,7 +163,12 @@
                 ].join(exportAsHtml ? " " : "  |  "));
             });
 
-            vm.Templates.exportSightings.val(exportSightingsArray.join(exportAsHtml ? "<br>" : "\n")).appendTo(document.body).select();
+            if (exportAsHtml) {
+                $("<div class='exportSightings'/>").html(exportSightingsArray.join("<br>")).appendTo(document.body); 
+            } else {
+                $("<textarea class='exportSightings'/>").val(exportSightingsArray.join("\n")).appendTo(document.body).select();
+            }
+
         };
 
         vm.sendEmail = function(mailBody) {
