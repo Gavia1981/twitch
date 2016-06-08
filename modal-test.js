@@ -152,12 +152,14 @@
                     exportAsHtml 
                         ? "<b>" + window.viewModel.renderTaxonName(sighting) + "</b>" 
                         : window.viewModel.renderTaxonName(sighting),
-                    sighting.SightingPresentation,
-                    $(sighting.SitePresentation + ', ' + sighting.RegionShortName).text(),
-                    sighting.ObservedDatePresentation + ' - ' + sighting.TimePresentation,
-                    $(sighting.Observers).text(),
                     exportAsHtml 
-                        ? "<i>" + sighting.PublicComment + "</i>" 
+                        ? "<i>" + sighting.SightingPresentation + "</i>"
+                        : sighting.SightingPresentation,
+                    $(sighting.SitePresentation + ', ' + sighting.RegionShortName).text(),
+                    sighting.ObservedDatePresentation + ' ' + sighting.TimePresentation,
+                    '(' + $(sighting.Observers).text() + ')',
+                    exportAsHtml 
+                        ? "<i>[" + (sighting.PublicComment || "") + "]</i>" 
                         : sighting.PublicComment,
                     "https://artportalen.se/Sighting/" + sighting.SightingId
                 ].join(exportAsHtml ? " " : "  |  "));
