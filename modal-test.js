@@ -18,6 +18,7 @@
         vm.extractionIsActive = false;
         vm.extractionActivated = function(state) {
             vm.extractionIsActive = state;
+            vm.Templates.modal.find(".btn-abort i").toggleClass("icon-play", !vm.extractionIsActive).toggleClass("icon-pause", vm.extractionIsActive);
             vm.Templates.modal.find(".loader").toggle(vm.extractionIsActive);
             return state;
         };
@@ -54,12 +55,14 @@
                 ".rowAdded .checkmark:after { border-color: #000; }",
                 ".checkmark { display: inline-block; margin: 2px 2px 1px; }",
                 ".checkmark:after { content: ''; display: block; width: 3px; height: 6px; border: solid transparent; border-width: 0 2px 2px 0; transform: rotate(45deg); }",
-                ".exportSightings { z-index: 9999; position: fixed; top: 0; right: 0; left: 0; bottom: 0; width: 100%; background-color: #fff; }",
+                ".exportSightings { z-index: 9999; position: fixed; top: 0; right: 0; left: 0; bottom: 0; width: 100%; background-color: #fff; padding:5px; }",
+                ".exportSightings .btn { position:fixed; top:10px; right:25px; }",
+                ".btn-small [class^='icon-'], .btn-small [class*=' icon-'] { margin-left: 5px; border-left: 1px solid #DCDCDC; padding: 7px 0px 5px 8px; }",
             "</style>"
         ].join("\n")).appendTo(document.body);
 
         // The button used to show or hide to modal window
-        vm.Templates.button = $('<button type="button" class="btn btn-success" id="btnToggleTwitch"><i class="icon-eye-open"></i></button>').click(function(e) {
+        vm.Templates.button = $('<button type="button" class="btn btn-large btn-success" id="btnToggleTwitch"><i class="icon-eye-open"></i></button>').click(function(e) {
             e.preventDefault();
             $("#sightingInfoModal").modal('hide');
             vm.Templates.modal.modal("show");
@@ -77,21 +80,19 @@
                     '<div class="loadingmessage"><img src="//artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
                 '</div>',
                 '<div class="modal-footer">',
-                    '<a href="#" class="btn btn-medium pull-left btn-settings"><i class="icon-cog"></i></a>',
-                    '<a href="#" class="btn btn-small btn-export"><i class="icon-inbox"></i></a>',
-                    '<a href="#" class="btn btn-small pull-right btn-abort"><i class="icon-pause"></i></a>',
+                    '<a href="#" class="btn btn-small pull-left btn-settings">Inställningar <i class="icon-cog"></i></a>',
+                    '<a href="#" class="btn btn-small btn-export">Exportera <i class="icon-cloud-download"></i></a>',
+                    '<a href="#" class="btn btn-small pull-right btn-abort">Scanna <i class="icon-pause"></i></a>',
                 '</div>',
             '</div>'
         ].join("\n")).appendTo(document.body).modal("show").find("button.close").click(function() {
             // Closing the modal will clean upp DOM and subscription to knockout observeable
+            // vm.toggleSightingSubscription(false);
             vm.extractionActivated(false);
-            vm.toggleSightingSubscription(false);
-            vm.Templates.styles.remove();
         }).end().find(".btn-abort").click(function(e) {
             e.preventDefault();
             var $btn = $(this);
             var currentState = vm.extractionIsActive;
-            $btn.find("i").toggleClass("icon-play icon-pause");
             vm.extractionActivated(!currentState);
             if (!currentState) vm.pageForward();
         }).end().find(".btn-export").click(function(e) {
@@ -101,7 +102,7 @@
             vm.Templates.modal.modal("hide");
             $("#bookmarks").click();
             setTimeout(function() {
-                vm.exportSightings(true);
+                vm.exportSightings();
             }, 500);
         }).end().find(".btn-settings").click(function(e) {
             e.preventDefault();
@@ -111,9 +112,18 @@
         // The table used inside the modal to show extracted sighting
         vm.Templates.table = $("<table id='extractedsightings'></table>").on( "click", "tr:not(.divider)", function() {
             $(this).addClass("rowAdded");
-            console.log("Klickade på todayssightingid: " + $(this).data("todayssightingid"));
             vm.showSightingInfo($(this).data("todayssightingid"));
         }).appendTo(vm.Templates.modal.find(".modal-body"));
+
+        vm.Templates.exportView = $([
+            '<div class="exportSightings" id="exportSightings">',
+                '<a href="#" class="btn btn-primary"><i class="icon-remove"></i></a>',
+                '<div class="exportArea"></div>',
+            '</div>'
+        ].join("\n")).appendTo(document.body).hide().find(".btn").click(function(e) {
+            e.preventDefault();
+            vm.Templates.exportView.hide();
+        }).end();
 
         vm.Templates.settingsForm = $([
             '<form>',
@@ -139,38 +149,42 @@
             vm.Templates.settingsForm.find("#input_useralias").val(localStorage.getItem("twitch-useralias") || "");
         };
 
-        vm.exportSightings = function(exportAsHtml) {
-            
-            var exportSightingsArray = [];
-            $.each(window.viewModel.sightings(), function(index, sighting) {
-                exportSightingsArray.push([
-                    exportAsHtml 
-                        ? "<b>" + window.viewModel.renderTaxonName(sighting) + "</b>" 
-                        : window.viewModel.renderTaxonName(sighting),
-                    exportAsHtml 
-                        ? "<i>" + sighting.SightingPresentation + "</i>"
-                        : sighting.SightingPresentation,
-                    $(sighting.SitePresentation + ', ' + sighting.RegionShortName).text(),
-                    sighting.ObservedDatePresentation + ' ' + sighting.TimePresentation,
-                    '(' + $(sighting.Observers).text() + ')',
-                    exportAsHtml 
-                        ? "<i>[" + (sighting.PublicComment || "") + "]</i>" 
-                        : sighting.PublicComment,
-                    "https://artportalen.se/Sighting/" + sighting.SightingId
-                ].join(exportAsHtml ? " " : "  |  "));
-            });
-
-            if (exportAsHtml) {
-                $("<div class='exportSightings'/>").html(exportSightingsArray.join("<br>")).appendTo(document.body); 
-            } else {
-                $("<textarea class='exportSightings'/>").val(exportSightingsArray.join("\n")).appendTo(document.body).select();
+        vm.selectText = function(element) {
+            var doc = document, text = doc.getElementById(element), range, selection;    
+            if (doc.body.createTextRange) {
+                range = document.body.createTextRange();
+                range.moveToElementText(text);
+                range.select();
+            } else if (window.getSelection) {
+                selection = window.getSelection();        
+                range = document.createRange();
+                range.selectNodeContents(text);
+                selection.removeAllRanges();
+                selection.addRange(range);
             }
+        }
 
-        };
-
-        vm.sendEmail = function(mailBody) {
-            var mailToLink = "mailto:" + localStorage.getItem("twitch-email") + "?body=" + encodeURIComponent(mailBody);
-            window.location.href = mailToLink;
+        vm.exportSightings = function() {
+            var exportSightingsArray = [];
+            var regionName = "";
+            $.each(window.viewModel.sightings(), function(index, sighting) {
+                if (regionName !== sighting.RegionName) {
+                    exportSightingsArray.push("<br><b>------- " + sighting.RegionName + " -------</b>");
+                    regionName = sighting.RegionName;
+                }
+                exportSightingsArray.push([
+                    "<b>" + window.viewModel.renderTaxonName(sighting) + "</b>",
+                    " - <a href='https://artportalen.se/Sighting/'" + sighting.SightingId + ">" + $(sighting.SitePresentation + ', ' + sighting.RegionShortName).text() + "</a>"
+                ].join(" "));
+                exportSightingsArray.push([
+                    sighting.SightingPresentation,
+                    sighting.ObservedDatePresentation + ' - ' + sighting.TimePresentation,
+                    "(" + $(sighting.Observers).text() + ")",
+                    sighting.PublicComment ? "<i>[" + sighting.PublicComment + "]</i>" : ""
+                ].join(" "));
+            });
+            vm.Templates.exportView.show().find(".exportArea").html(exportSightingsArray.join("<br>"));
+            vm.selectText("exportSightings");
         };
 
         // Pageing withing the host viewmodel. If at last page, go one day back until the end is reached
