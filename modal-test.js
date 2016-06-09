@@ -116,14 +116,11 @@
         }).appendTo(vm.Templates.modal.find(".modal-body"));
 
         vm.Templates.exportView = $([
-            '<div class="exportSightings" id="exportSightings">',
-                '<a href="#" class="btn btn-primary"><i class="icon-remove"></i></a>',
-                '<div class="exportArea"></div>',
+            '<div class="modal hide in" id="exportSightings">',
+                '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>',
+                '<div id="exportArea"></div>',
             '</div>'
-        ].join("\n")).appendTo(document.body).hide().find(".btn").click(function(e) {
-            e.preventDefault();
-            vm.Templates.exportView.hide();
-        }).end();
+        ].join("\n")).appendTo(document.body);
 
         vm.Templates.settingsForm = $([
             '<form>',
@@ -183,8 +180,10 @@
                     sighting.PublicComment ? "<i>[" + sighting.PublicComment + "]</i>" : ""
                 ].join(" "));
             });
-            vm.Templates.exportView.show().find(".exportArea").html(exportSightingsArray.join("<br>"));
-            vm.selectText("exportSightings");
+            vm.Templates.exportView.modal("show").find("#exportArea").html(exportSightingsArray.join("<br>"));
+            setTimeout(function() {
+                vm.selectText("exportArea");
+            }, 500);
         };
 
         // Pageing withing the host viewmodel. If at last page, go one day back until the end is reached
