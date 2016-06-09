@@ -118,14 +118,18 @@
         vm.Templates.exportView = $([
             '<div class="modal hide in" id="exportSightings">',
                 '<div class="modal-header">',
-                    '<b>Exportera</b>',
+                    '<b>Exportera</b> ',
+                    '<button type="button" class="btn btn-select">Markera text</button>',
                     '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>',
                 '</div>',
                 '<div class="modal-body">',
                     '<div id="exportArea"></div>',
                 '</div>',
             '</div>'
-        ].join("\n")).appendTo(document.body);
+        ].join("\n")).appendTo(document.body).find(".btn-select").click(function(e) {
+            e.preventDefault();
+            vm.selectText("exportArea");
+        }).end();
 
         vm.Templates.settingsForm = $([
             '<form>',
