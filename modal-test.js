@@ -55,6 +55,8 @@
                 ".rowAdded .checkmark:after { border-color: #000; }",
                 ".checkmark { display: inline-block; margin: 2px 2px 1px; }",
                 ".checkmark:after { content: ''; display: block; width: 3px; height: 6px; border: solid transparent; border-width: 0 2px 2px 0; transform: rotate(45deg); }",
+                ".exportSightings { z-index: 9999; position: fixed; top: 0; right: 0; left: 0; bottom: 0; width: 100%; background-color: #fff; padding:5px; }",
+                ".exportSightings .btn { position:fixed; top:10px; right:25px; }",
                 ".btn-small [class^='icon-'], .btn-small [class*=' icon-'] { margin-left: 5px; border-left: 1px solid #DCDCDC; padding: 7px 0px 5px 8px; }",
             "</style>"
         ].join("\n")).appendTo(document.body);
@@ -115,8 +117,13 @@
 
         vm.Templates.exportView = $([
             '<div class="modal hide in" id="exportSightings">',
-                '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>',
-                '<div id="exportArea"></div>',
+                '<div class="modal-header">',
+                    '<b>Exportera</b>',
+                    '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>',
+                '</div>',
+                '<div class="modal-body">',
+                    '<div id="exportArea"></div>',
+                '</div>',
             '</div>'
         ].join("\n")).appendTo(document.body);
 
