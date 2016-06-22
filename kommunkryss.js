@@ -9,7 +9,6 @@
         }
         onerror.max = 3;
         onerror.num = 0;
-
         /**
          * fastLiveFilter jQuery plugin 1.0.3
          * 
