@@ -319,6 +319,7 @@
 
         vm.firstLoad = function() {
             vm.kommunData = JSON.parse(localStorage.getItem("kommunData"));
+            if (vm.kommunData === null) vm.kommunData = {};
             vm.extractionActivated(true);
             var html = [];
             $.each(vm.Municipalitys, function (index, value) {
