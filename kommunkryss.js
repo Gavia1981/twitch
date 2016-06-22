@@ -133,6 +133,7 @@
                 ".lbl b { padding-left: 4px; display: inline-block; }",
                 ".lbl { display: inline-block; padding: 4px 8px; line-height: 14px; white-space: nowrap; vertical-align: baseline; background-color: #FFF; border: 1px solid rgba(0,0,0,0.1); margin: 2px; font-size: 12px; border-radius: 3px; }",
                 ".lbl.hasdata { background-color: #D7EBEF; } ",
+                "@media (max-width: 480px) #extractSightingsModal #smalltabs { margin: -15px -15px 5px; }"
             "</style>"
         ].join("\n")).appendTo(document.body);
 
