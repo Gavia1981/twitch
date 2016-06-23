@@ -110,11 +110,11 @@
         // Add some style to inserted elements
         vm.Templates.styles = $([
             "<style type='text/css'>",
-                "#btnToggleTwitch { position: fixed; bottom:20px; left:20px; z-index:9999; }",
+                "#btnToggleTwitch { position: fixed; bottom:10px; left:10px; z-index:9999; }",
                 ".loader { height: 4px; width: 100%; position: relative; overflow: hidden; background-color: #ddd; }",
                 ".loader:before { display: block; position: absolute; content: ''; left: -200px; width: 200px; height: 4px; background-color: #2980b9; animation: loading 2s linear infinite; }",
-                ".loader.paused { background-color: #fafafa; }",
-                ".loader.paused:before { background-color: #fafafa; -webkit-animation-play-state: paused; -moz-animation-play-state: paused; -o-animation-play-state: paused; animation-play-state: paused; }",
+                ".loader.paused { background-color: #f6f6f6; }",
+                ".loader.paused:before { background-color: #f6f6f6; -webkit-animation-play-state: paused; -moz-animation-play-state: paused; -o-animation-play-state: paused; animation-play-state: paused; }",
                 "@keyframes loading { from {left: -200px; width: 30%;} 50% {width: 30%;} 70% {width: 70%;} 80% { left: 50%;} 95% {left: 120%;} to {left: 100%;} }",
                 "#extractedsightings h4 { margin: 1em 0 0;border-bottom: 1px solid #999; }",
                 "#extractedsightings tr:not(.divider) { cursor:pointer; border-bottom:1px solid #eee; }",
@@ -139,18 +139,20 @@
         ].join("\n")).appendTo(document.body);
 
         // The button used to show or hide to modal window
-        vm.Templates.button = $('<button type="button" class="btn btn-large btn-success" id="btnToggleTwitch"><i class="icon-th-list"></i></button>').click(function(e) {
+        vm.Templates.button = $('<button type="button" class="btn btn-small btn-success" id="btnToggleTwitch"><i class="icon-th-list"></i></button>').click(function(e) {
             e.preventDefault();
             $("#sightingInfoModal").modal('hide');
             vm.Templates.modal.modal("show");
         }).appendTo(document.body);
+
+        vm.Templates.modalTitle = '<span class="modal-title"><i class="icon-th-list"></i> <b><span class="modal-title-text">Kryss per ' + vm.selectedRegionType.toLowerCase() + '</span></b> <span class="count"></span><br><small></small></span>';
 
         // The modal window for sightings
         vm.Templates.modal = $([
             '<div class="modal hide in custommodal" id="extractSightingsModal">',
                 '<div class="modal-header">',
                     '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>',
-                    '<span class="modal-title"><i class="icon-th-list"></i> <span class="modal-title-text">Kryss per ' + vm.selectedRegionType.toLowerCase() + '</span> <b></b><br><small></small></span>',
+                    vm.Templates.modalTitle,
                 '</div>',
                 '<div class="loader"></div>',
                 '<div class="modal-body">',
@@ -203,18 +205,20 @@
         ].join("\n")).find(".btn-primary").click(function(e) {
             e.preventDefault();
             localStorage.setItem("twitch-useralias", vm.Templates.settingsForm.find("#input_useralias").val());
-            vm.Templates.settingsForm.hide();
+            vm.Templates.settingsForm.remove();
+            vm.Templates.modal.find(".modal-footer").show();
+            vm.Templates.modal.find(".modal-title").replaceWith(vm.Templates.modalTitle);
             vm.Templates.modal.find(".modal-footer").show();
             vm.Templates.modal.find(".modal-body").find("#smalltabs, .tab-content").show();
             vm.firstLoad();
         }).end();
 
         vm.showSettings = function() {
-            vm.Templates.modal.find(".modal-title").html("<b>Inställningar</b>");
             vm.Templates.modal.find(".modal-footer").hide();
+            vm.Templates.modal.find(".modal-title").html("<b>Inställningar</b>");
             vm.Templates.modal.find(".modal-body").find("#smalltabs, .tab-content").hide();
             vm.Templates.modal.find(".modal-body").append(vm.Templates.settingsForm);
-            vm.Templates.settingsForm.find("#input_useralias").val(localStorage.getItem("twitch-useralias") || "");
+            vm.Templates.settingsForm.find("#input_useralias").val(localStorage.getItem("twitch-useralias") || "").focus().select();
         };
         
         vm.getListUrl = function(regionName) {
@@ -338,7 +342,7 @@
             function roundToTwo(num) {    
                 return +(Math.round(num + "e+2")  + "e-2");
             }
-            vm.Templates.modal.find(".modal-title b").text("(" + summa + ")");
+            vm.Templates.modal.find(".modal-title .count").text("(" + summa + ")");
             vm.Templates.modal.find(".modal-title small").text((vm.regions.length - vm.Templates.modal.find(".lbl:has(:empty)").length) + " av " + vm.regions.length + " | " + roundToTwo(medel) + " i medel | " + yearTicks + " nya " + vm.selectedYear);
         };
 
