@@ -52,7 +52,9 @@
 		if (duration.indexOf("hour(s)") !== -1) {
 			var extractTime = duration.split(' hour(s), ');
 			startDate = addHours(startDate, extractTime[0]); vm.log("vm.setEndDate added (" + extractTime[0] + ") hours. " + startDate);
-			startDate = addMinutes(startDate, extractTime[1].split(" minute(s)")[0]); vm.log("vm.setEndDate added (" + duration.split(" minute(s)")[0] + ") minutes. " + startDate);
+			if (duration.indexOf("minute(s)") !== -1) {
+				startDate = addMinutes(startDate, extractTime[1].split(" minute(s)")[0]); vm.log("vm.setEndDate added (" + duration.split(" minute(s)")[0] + ") minutes. " + startDate);
+			}
 		} else {
 			startDate = addMinutes(startDate, duration.split(" minute(s)")[0]); vm.log("vm.setEndDate added (" + duration.split(" minute(s)")[0] + ") minutes. " + startDate);
 		}
