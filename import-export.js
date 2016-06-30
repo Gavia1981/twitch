@@ -8,7 +8,7 @@
 		if (vm.debug) console.log(message);
 	};
 
-    vm.modalWidth = $(window).width() > 800 ? 800 : 450;
+    vm.modalWidth = $(window).width() > 800 ? 800 : 350;
 
 	vm.templates = {};
 	vm.templates.styles = $([
