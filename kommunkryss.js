@@ -67,6 +67,20 @@
     function twitchViewModel () {
 
         var vm = this; 
+        vm.debug = true;
+        vm.timer = {
+            total : 0,
+            start : function() {
+                if (vm.debug) vm.timer.time = new Date().getTime();
+            },
+            stop : function() {
+                if (vm.debug) { 
+                    var elapsedTime = new Date().getTime() - vm.timer.time;
+                    vm.timer.total += elapsedTime;
+                    console.log("Timer: " + elapsedTime + "; Total: " + vm.timer.total); 
+                }
+            }
+        }
 
         vm.selectedYear = new Date().getFullYear();
         vm.sortListBySpecies = true;
@@ -80,14 +94,15 @@
         };
         
         vm.regionData = {};
-        vm.setRegionData = function(namn, antal, yearTicks) {
-            vm.regionData[namn] = {
-                antal : antal,
-                yearTicks : yearTicks,
-                updated : new Date()
+        vm.setRegionData = function(item) {
+            vm.regionData[item.regionName] = {
+                antal : item.antal,
+                yearTicks : item.yearTicks,
+                updated : new Date(),
+                speciesList : item.speciesList
             };
             localStorage.setItem(vm.selectedRegionType + "Data", JSON.stringify(vm.regionData));
-            return vm.regionData[namn];
+            return vm.regionData[item.regionName];
         };
 
         vm.getRegionData = function(namn) {
@@ -99,6 +114,11 @@
         // Loading sightings active?
         vm.extractionIsActive = false;
         vm.extractionActivated = function(state) {
+            if (state) { 
+                vm.timer.start(); 
+            } else {
+                vm.timer.stop(); 
+            }
             vm.extractionIsActive = state;
             vm.Templates.modal.find(".loader").toggleClass("paused", !vm.extractionIsActive);
             return state;
@@ -190,7 +210,7 @@
             vm.extractionActivated(false);
         }).end().find(".btn-loadmultiple").click(function(e) {
             e.preventDefault();
-            $("#regionstab .lbl:not(.hasdata):lt(25)").each(function() {
+            $("#regionstab .lbl:not(.hasdata):lt(" + (vm.selectedRegionType === vm.regionType[1] ? "29" : "50" ) + ")").each(function() {
                 vm.getListData($(this).closest(".dropdown"));
             });
         }).end();
@@ -275,9 +295,10 @@
                     }
                     return $(this).data("taxonid");
                 }).get();
-                vm.setRegionData(regionName, vm.missingSpeciesArray.length, yearSum);
+                var item = { regionName : regionName, antal : vm.missingSpeciesArray.length, yearTicks : yearSum, speciesList : vm.missingSpeciesArray };
+                //vm.setRegionData(item);
                 vm.updateRegionSumma();
-                $(obj).replaceWith(vm.displayRegionItem(regionName, vm.setRegionData(regionName, vm.missingSpeciesArray.length, yearSum)));
+                $(obj).replaceWith(vm.displayRegionItem(regionName, vm.setRegionData(item)));
                 vm.extractionActivated(false);
             });
         };
@@ -314,8 +335,9 @@
                 }).end();
                 vm.Templates.modal.find("#listtab").html($header.add($table));
                 $('#smalltabs a[href="#listtab"]').text(regionName + " (" + numberOfSpecies + ")");
-                vm.setRegionData(regionName, numberOfSpecies, yearSum);
-                $(obj).replaceWith(vm.displayRegionItem(regionName, vm.setRegionData(regionName, numberOfSpecies, yearSum)));
+                var item = { regionName : regionName, antal : vm.missingSpeciesArray.length, yearTicks : yearSum, speciesList : vm.missingSpeciesArray };
+                localStorage.setItem("selectedSpeciesList", JSON.stringify(item));
+                $(obj).replaceWith(vm.displayRegionItem(regionName, vm.setRegionData(item)));
                 vm.extractionActivated(false);
             });
         };
