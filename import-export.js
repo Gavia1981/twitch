@@ -321,8 +321,8 @@
         } else {
             vm.selectionMode = false;
             vm.templates.modal.show();
-            vm.templates.modal.find("a.tab:not(.active)").click().end().find("a.tab:not(.active)").hide();
-            vm.templates.toggleButtons.find("a.export").text("Importera");
+            //vm.templates.modal.find("a.tab:not(.active)").click().end().find("a.tab:not(.active)").hide();
+            //vm.templates.toggleButtons.find("a.export").text("Importera");
         }        
     };
 
