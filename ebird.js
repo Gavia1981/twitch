@@ -80,7 +80,7 @@
 	vm.getSightings = function() {
 		var sightingRows = [];
 		var siteName = $("h5.obs-loc").clone().children().remove().end().text().replace(/\s\s+/g, ' ');
-		var sightingDate = new Date($("h5.rep-obs-date").text());
+		var sightingDate = new Date($("h5.rep-obs-date").clone().children().remove().end().text());
 		var startDate = sightingDate.toISOString().slice(0,10);
 		var endDate = vm.setEndDate(sightingDate);
 		var startTime = sightingDate.toTimeString().split(' ')[0];
