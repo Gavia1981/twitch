@@ -81,7 +81,7 @@
 		var sightingRows = [];
 		var siteName = $("h5.obs-loc").clone().children().remove().end().text().replace(/\s\s+/g, ' ');
 		var findCoordinate = /(\d+\,\d+)x(\d+\,\d+)/gi.exec(siteName);
-		var coordinates = findCoordinate[0] == null ? "&nbsp;" : findCoordinate[0].replace(/,/, ".");
+		var coordinates = findCoordinate == null ? "&nbsp;" : findCoordinate[0].replace(/,/, ".");
 		var sightingDate = new Date($("h5.rep-obs-date").clone().children().remove().end().text());
 		var startDate = sightingDate.toISOString().slice(0,10);
 		var endDate = vm.setEndDate(sightingDate);
