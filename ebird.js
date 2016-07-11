@@ -33,7 +33,7 @@
     }).end();
 
 	vm.stripSpeciesName = function(speciesName ) {
-		return speciesName.replace(/\(hybrid\)|\(viridis\/karelini\)|\(canus\)|\(hirundo\)|\(merganser\/orientalis\)|\(alba\/dukhunensis\)|\[major Group\]|\/vitbröstad skarv|\(carbo\)|\/australisk fiskgjuse|\(haliaetus\)|\/jakutisk nötväcka/gi,"");
+		return speciesName.replace(/\(hybrid\)|\(viridis\/karelini\)|\/grön fasan|\(canus\)|\(hirundo\)|\(merganser\/orientalis\)|\(alba\/dukhunensis\)|\[major Group\]|\/vitbröstad skarv|\(carbo\)|\/australisk fiskgjuse|\(haliaetus\)|\/jakutisk nötväcka/gi,"");
 	};
 
 	function addHours(d, h) {
