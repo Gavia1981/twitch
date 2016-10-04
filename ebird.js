@@ -49,7 +49,7 @@
 		vm.log("vm.setEndDate startDate = " + startDate);
 		if (!$("dt:contains('Duration:')").length) return startDate;
 		var duration = $("dt:contains('Duration:')").siblings("dd").text();
-		var matchHours = /(\d)\s[hour\(s\)]/g.exec(duration);
+		var matchHours = /(\d{1,2})\s[hour\(s\)]/g.exec(duration);
 		if (matchHours != null) {
 		    startDate = addHours(startDate, matchHours[1]); vm.log("vm.setEndDate added (" + matchHours[1] + ") hours. " + startDate);
 		}
