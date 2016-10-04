@@ -50,7 +50,7 @@
 		if (!$("dt:contains('Duration:')").length) return startDate;
 		var duration = $("dt:contains('Duration:')").siblings("dd").text();
 		if (duration.indexOf("hour(s)") !== -1) {
-			var extractTime = duration.split(' hour(s), ');
+			var extractTime = duration.split(' hour(s)');
 			startDate = addHours(startDate, extractTime[0]); vm.log("vm.setEndDate added (" + extractTime[0] + ") hours. " + startDate);
 			if (duration.indexOf("minute(s)") !== -1) {
 				startDate = addMinutes(startDate, extractTime[1].split(" minute(s)")[0]); vm.log("vm.setEndDate added (" + duration.split(" minute(s)")[0] + ") minutes. " + startDate);
