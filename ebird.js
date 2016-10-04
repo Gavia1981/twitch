@@ -102,7 +102,7 @@
 					"<td>&nbsp;</td>", 
 					"<td>" + startDate + "</td>", 
 					"<td>" + startTime.substring(0, 5) + "</td>", 
-					"<td>" + startDate + "</td>", 
+					"<td>" + endDate.toISOString().slice(0,10) + "</td>", 
 					"<td>" + endTime.substring(0, 5) + "</td>", 
 					"<td>" + $row.find(".obs-comments").text() + "</td>", 
 				"</tr>"
