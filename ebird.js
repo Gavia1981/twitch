@@ -49,14 +49,13 @@
 		vm.log("vm.setEndDate startDate = " + startDate);
 		if (!$("dt:contains('Duration:')").length) return startDate;
 		var duration = $("dt:contains('Duration:')").siblings("dd").text();
-		if (duration.indexOf("hour(s)") !== -1) {
-			var extractTime = duration.split(' hour(s)');
-			startDate = addHours(startDate, extractTime[0]); vm.log("vm.setEndDate added (" + extractTime[0] + ") hours. " + startDate);
-			if (duration.indexOf("minute(s)") !== -1) {
-				startDate = addMinutes(startDate, extractTime[1].split(" minute(s)")[0]); vm.log("vm.setEndDate added (" + duration.split(" minute(s)")[0] + ") minutes. " + startDate);
-			}
-		} else {
-			startDate = addMinutes(startDate, duration.split(" minute(s)")[0]); vm.log("vm.setEndDate added (" + duration.split(" minute(s)")[0] + ") minutes. " + startDate);
+		var matchHours = /(\d)\s[hour\(s\)]/g.exec(duration);
+		if (matchHours != null) {
+		    startDate = addHours(startDate, matchHours[1]); vm.log("vm.setEndDate added (" + matchHours[1] + ") hours. " + startDate);
+		}
+		var matchMinutes = /(\d{1,2})\s[minute\(s\)]/g.exec(duration);
+		if (matchMinutes != null) {
+		    startDate = addMinutes(startDate, matchMinutes[1]); vm.log("vm.setEndDate added (" + matchMinutes[1] + ") minutes. " + startDate);
 		}
 		vm.log("vm.setEndDate after processing startDate = " + startDate);
 		return startDate;
