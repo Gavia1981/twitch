@@ -33,6 +33,14 @@
     }).end();
 
 	vm.stripSpeciesName = function(speciesName ) {
+		switch(speciesName.toLowerCase()) {
+		    case "klippduva":
+			speciesName = "Tamduva"; break;
+		    case "common redpoll":
+			speciesName = "Gråsiska"; break;
+		    case "tajgasädgås/tundrasädgås":
+			speciesName = "Sädgås"; break;
+		}
 		return speciesName.replace(/\(hybrid\)|\(viridis\/karelini\)|\/grön fasan|\(canus\)|\(hirundo\)|\(collybita\)|\(merganser\/orientalis\)|\(anser\)|\(alba\/dukhunensis\)|\[major Group\]|\/vitbröstad skarv|\(carbo\)|\/australisk fiskgjuse|\(haliaetus\)|\/jakutisk nötväcka/gi,"");
 	};
 
