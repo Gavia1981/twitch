@@ -16,32 +16,38 @@
                 "table.sightings td { border: 1px solid #ccc; border-collapse: separate; padding:0 10px 0 3px; }",
                 "[class*='close-'] { color: #777; font: 14px/100% arial, sans-serif; position: absolute; right: 5px; text-decoration: none; text-shadow: 0 1px 0 #fff; top: 5px; }",
                 ".close-thik:after { content: '✖'; /* UTF-8 symbol */ }",
+                "#copybutton { display:none; position: absolute; top: 50%; left: 50%; background-color: #ffffff; width: 200px; line-height: 100px; margin-left: -100px; margin-top: -50px; text-align: center; font-size: 30px; border-radius: 5px; }",
             "</style>"
         ].join("\n")).appendTo(document.body);
 
 	vm.templates.sightingsWrapper = $([
+			'<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.13/clipboard.min.js"></script>',
             '<div class="view-sightings">',
             	'<a href="#" class="close-thik"></a>',
             	'<div class="sightingsWrapper">',
             		'<table class="sightings" id="sightingsTable"></table>',
             	'</div>',
+            	'<a href="#" data-clipboard-target="#sightingsTable" id="copybutton">Kopiera</a>',
             '</div>'
         ].join("\n")).appendTo(document.body)
 	.find(".close-thik").click(function(e) {
         e.preventDefault();
         vm.templates.sightingsWrapper.hide();
+    }).end().find("#copybutton").click(function(e) {
+    	e.preventDefault();
+
     }).end();
 
 	vm.stripSpeciesName = function(speciesName ) {
 		switch(speciesName.toLowerCase()) {
 		    case "klippduva (feral pigeon)":
-			speciesName = "Tamduva"; break;
+				speciesName = "Tamduva"; break;
 		    case "common redpoll":
-			speciesName = "Gråsiska"; break;
-	            case "lesser redpoll":
-			speciesName = "Brunsiska"; break;
+				speciesName = "Gråsiska"; break;
+	        case "lesser redpoll":
+				speciesName = "Brunsiska"; break;
 		    case "tajgasädgås/tundrasädgås":
-			speciesName = "Sädgås"; break;
+				speciesName = "Sädgås"; break;
 		}
 		return speciesName.replace(/\(hybrid\)|\(viridis\/karelini\)|\/grön fasan|\(canus\)|\(hirundo\)|\(collybita\)|\(merganser\/orientalis\)|\(anser\)|\(alba\/dukhunensis\)|\[major Group\]|\[gentilis Group\]|\[arvensis Group\]|\/vitbröstad skarv|\(carbo\)|\/australisk fiskgjuse|\(haliaetus\)|\/mexikansk and|\/jakutisk nötväcka/gi,"");
 	};
@@ -71,6 +77,35 @@
 		return startDate;
 	};
 
+	vm.getSite = function() {
+		var rawSiteName = $("h5.obs-loc").clone().children().remove().end().text().replace(/\s\s+/g, ' ');
+		var findCoordinate = /(\d+\,\d+)x(\d+\,\d+)/gi.exec(rawSiteName);
+		var coordinates = findCoordinate == null ? ["&nbsp;", "&nbsp;"] : findCoordinate[0].replace(/,/g, ".").split("x");
+		var accuracy = findCoordinate == null ? "&nbsp;" : 250;
+		rawSiteName = rawSiteName.replace(/^\s*SE-\S+\slän-/gi, '');
+		rawSiteName = rawSiteName.replace(/\s-\s\d\d/gi, '');
+		return {
+			siteName : rawSiteName,
+			lon : coordinates[0],
+			lat : coordinates[1],
+			accuracy : accuracy
+		};
+	};
+
+	vm.getDateTime = function() {
+		var sightingDate = new Date($("h5.rep-obs-date").clone().children().remove().end().text());
+		var startDate = sightingDate.toISOString().slice(0,10);
+		var endDate = vm.setEndDate(sightingDate);
+		var startTime = sightingDate.toTimeString().split(' ')[0];
+		var endTime = endDate.toTimeString().split(' ')[0];
+		return {
+			startDate : startDate,
+			startTime : startTime.substring(0, 5),
+			endDate : endDate.toISOString().slice(0,10),
+			endTime : endTime.substring(0, 5)
+		};
+	};
+
     vm.selectText = function(element) {
         var doc = document, text = doc.getElementById(element), range, selection;    
         if (doc.body.createTextRange) {
@@ -88,14 +123,9 @@
 
 	vm.getSightings = function() {
 		var sightingRows = [];
-		var siteName = $("h5.obs-loc").clone().children().remove().end().text().replace(/\s\s+/g, ' ');
-		var findCoordinate = /(\d+\,\d+)x(\d+\,\d+)/gi.exec(siteName);
-		var coordinates = findCoordinate == null ? "&nbsp;" : findCoordinate[0].replace(/,/, ".");
-		var sightingDate = new Date($("h5.rep-obs-date").clone().children().remove().end().text());
-		var startDate = sightingDate.toISOString().slice(0,10);
-		var endDate = vm.setEndDate(sightingDate);
-		var startTime = sightingDate.toTimeString().split(' ')[0];
-		var endTime = endDate.toTimeString().split(' ')[0];
+		var site = vm.getSite();
+		var dateTime = vm.getDateTime();
+
 		$("#spp-list tr.spp-entry").each(function() {
 			var $row = $(this);
 			sightingRows.push([
@@ -105,15 +135,15 @@
 					"<td>&nbsp;</td>", 
 					"<td>&nbsp;</td>", 
 					"<td>&nbsp;</td>", 
-					"<td>" + siteName.split(",")[0] + "</td>", 
-					"<td>" + coordinates + "</td>", 
+					"<td>" + site.siteName.split(",")[0] + "</td>", 
 					"<td>&nbsp;</td>", 
-					"<td>&nbsp;</td>", 
-					"<td>&nbsp;</td>", 
-					"<td>" + startDate + "</td>", 
-					"<td>" + startTime.substring(0, 5) + "</td>", 
-					"<td>" + endDate.toISOString().slice(0,10) + "</td>", 
-					"<td>" + endTime.substring(0, 5) + "</td>", 
+					"<td>" + site.lon + "</td>", 
+					"<td>" + site.lat + "</td>", 
+					"<td>" + site.accuracy + "</td>", 
+					"<td>" + dateTime.startDate + "</td>", 
+					"<td>" + dateTime.startTime + "</td>", 
+					"<td>" + dateTime.endDate + "</td>", 
+					"<td>" + dateTime.endTime + "</td>", 
 					"<td>" + $row.find(".obs-comments").text() + "</td>", 
 				"</tr>"
 				].join(''));
@@ -122,8 +152,16 @@
 		vm.selectText("sightingsTable");
 	};
 
+	vm.copyButton = function() {
+		var clipboard = new Clipboard('#copybutton');
+		$("#copybutton").click();
+	};
+
 	vm.init = function() {
 		vm.getSightings();
+		setTimeout(function() {
+			vm.copyButton();
+		}, 1000);
 	};
 
 	vm.init();
