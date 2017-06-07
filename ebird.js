@@ -79,8 +79,8 @@
 
 	vm.getSite = function() {
 		var rawSiteName = $("h5.obs-loc").clone().children().remove().end().text().replace(/\s\s+/g, ' ');
-		var findCoordinate = /(\d+\,\d+)x(\d+\,\d+)/gi.exec(rawSiteName);
-		var coordinates = findCoordinate == null ? ["&nbsp;", "&nbsp;"] : findCoordinate[0].replace(/,/g, ".").split("x");
+		var findCoordinate = /(\d+\,\d+)(\,|x)(\d+\,\d+)/gi.exec(rawSiteName);
+		var coordinates = findCoordinate == null ? ["&nbsp;", "&nbsp;"] : [findCoordinate[1].replace(/,/g, "."), findCoordinate[3].replace(/,/g, ".")];
 		var accuracy = findCoordinate == null ? "&nbsp;" : 250;
 		rawSiteName = rawSiteName.replace(/^\s*SE-\S+\slän-/gi, '');
 		rawSiteName = rawSiteName.replace(/\s-\s\d\d/gi, '');
