@@ -135,7 +135,7 @@
 					"<td>&nbsp;</td>", 
 					"<td>&nbsp;</td>", 
 					"<td>&nbsp;</td>", 
-					"<td>" + site.siteName.split(",")[0] + "</td>", 
+					"<td>" + site.siteName + "</td>", /*.split(",")[0]*/
 					"<td>&nbsp;</td>", 
 					"<td>" + site.lat + "</td>", 	
 					"<td>" + site.lon + "</td>", 
