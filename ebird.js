@@ -76,6 +76,21 @@
 		vm.log("vm.setEndDate after processing startDate = " + startDate);
 		return startDate;
 	};
+	
+	vm.mapSiteName = function(siteName) {
+		var sites = {
+			"Fågelsundet" : ["Fågelsundet", "Björns skärgård"],
+			"Rödhäll outlook" : ["Rödhäll", "Björns skärgård"],
+			"Hållen" : ["Hållen", "Hållnäs"],
+			"Övre Föret": ["Övre Föret", "Årike Fyris"],
+			"Boholmen, Ledskärsområdet": ["Boholmen", "Ledskärsområdet"]
+		}
+		if (sites[siteName] !== undefined) {
+			return sites[siteName];
+		} else {
+			return [siteName, "&nbsp;"]
+		}
+	};
 
 	vm.getSite = function() {
 		var rawSiteName = $("h5.obs-loc").clone().children().remove().end().text().replace(/\s\s+/g, ' ');
@@ -84,8 +99,10 @@
 		var accuracy = findCoordinate == null ? "&nbsp;" : 250;
 		rawSiteName = rawSiteName.replace(/^\s*SE-\S+\slän-/gi, '');
 		rawSiteName = rawSiteName.replace(/\s-\s\d\d/gi, '');
+		var siteNames = vm.mapSiteName(rawSiteName);
 		return {
-			siteName : rawSiteName,
+			siteName : siteNames[0],
+			parentSiteName : siteNames[1],
 			lon : coordinates[0],
 			lat : coordinates[1],
 			accuracy : accuracy
@@ -136,7 +153,7 @@
 					"<td>&nbsp;</td>", 
 					"<td>&nbsp;</td>", 
 					"<td>" + site.siteName + "</td>", /*.split(",")[0]*/
-					"<td>&nbsp;</td>", 
+					"<td>" + site.parentSiteName + "</td>", 
 					"<td>" + site.lat + "</td>", 	
 					"<td>" + site.lon + "</td>", 
 					"<td>" + site.accuracy + "</td>", 
