@@ -84,15 +84,15 @@
 			"Hållen" : ["Hållen", "Hållnäs"],
 			"Övre Föret": ["Övre Föret", "Årike Fyris"],
 			"Boholmen, Ledskärsområdet": ["Boholmen", "Ledskärsområdet"]
-		}
+		};
 		for (var site in sites) {
 		    if (sites.hasOwnProperty(site)) {
 		    	if (site.substr(0, siteName.length) == siteName) {
-		    		return sites[site])
+		    		return sites[site];
 		    	}
 		    }
 		}
-		return [siteName, "&nbsp;"]
+		return [siteName, "&nbsp;"];
 	};
 
 	vm.getSite = function() {
