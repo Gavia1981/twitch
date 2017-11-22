@@ -79,11 +79,16 @@
 	
 	vm.mapSiteName = function(siteName) {
 		var sites = {
+			"Björn" : ["Björn", "Björns skärgård"],
 			"Fågelsundet" : ["Fågelsundet", "Björns skärgård"],
 			"Rödhäll outlook" : ["Rödhäll", "Björns skärgård"],
 			"Hållen" : ["Hållen", "Hållnäs"],
+			"Sikhjälma hamn" : ["Sikhjälma hamn", "Hållnäs"],
 			"Övre Föret": ["Övre Föret", "Årike Fyris"],
-			"Boholmen, Ledskärsområdet": ["Boholmen", "Ledskärsområdet"]
+			"Boholmen, Ledskärsområdet": ["Boholmen", "Ledskärsområdet"],
+			"Ledskärsviken": ["Ledskärsviken", "Ledskärsområdet"],
+			"Killskär": ["Killskär", "Hållnäs östra skärgård"],
+			"Slada hamn": ["Klubben, Klungsten", "Hållnäs östra skärgård"]
 		};
 		for (var site in sites) {
 		    if (sites.hasOwnProperty(site)) {
