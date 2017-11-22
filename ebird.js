@@ -85,10 +85,12 @@
 			"Övre Föret": ["Övre Föret", "Årike Fyris"],
 			"Boholmen, Ledskärsområdet": ["Boholmen", "Ledskärsområdet"]
 		}
-		for (var i = 0; i < sites.length; i++) {
-			if (sites[i].substr(0, siteName.length) == siteName) {
-				return sites[i];
-			}
+		for (var site in sites) {
+		    if (sites.hasOwnProperty(site)) {
+		    	if (site.substr(0, siteName.length) == siteName) {
+		    		return sites[site])
+		    	}
+		    }
 		}
 		return [siteName, "&nbsp;"]
 	};
