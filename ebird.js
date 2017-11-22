@@ -92,7 +92,7 @@
 		};
 		for (var site in sites) {
 		    if (sites.hasOwnProperty(site)) {
-		    	if (siteName.substr(0, site.length) == site) {
+		    	if (siteName.trim().substr(0, site.length) == site) {
 		    		return sites[site];
 		    	}
 		    }
