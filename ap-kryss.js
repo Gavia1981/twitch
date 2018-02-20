@@ -58,6 +58,9 @@
                 ".exportSightings { z-index: 9999; position: fixed; top: 0; right: 0; left: 0; bottom: 0; width: 100%; background-color: #fff; padding:5px; }",
                 ".exportSightings .btn { position:fixed; top:10px; right:25px; }",
                 ".exportSightings .btn-small [class^='icon-'], .exportSightings .btn-small [class*=' icon-'] { margin-left: 5px; border-left: 1px solid #DCDCDC; padding: 7px 0px 5px 8px; }",
+                ".lbl b { padding-left: 4px; display: inline-block; }",
+                ".lbl { display: inline-block; padding: 4px 8px; line-height: 14px; white-space: nowrap; vertical-align: baseline; background-color: #D7EBEF; border: 1px solid rgba(0,0,0,0.1); margin: 2px; font-size: 12px; border-radius: 3px; }",
+                "#extractSightingsModal #smalltabs { margin:-15px -15px 5px !important; }",
             "</style>"
         ].join("\n")).appendTo(document.body);
 
@@ -77,7 +80,16 @@
                 '</div>',
                 '<div class="loader"></div>',
                 '<div class="modal-body">',
-                    '<div class="loadingmessage"><img src="//artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
+                    '<ul class="nav nav-tabs" id="smalltabs">',
+                        '<li class="active"><a href="#regionstab" data-toggle="tab">Översikt</a></li>',
+                        '<li><a href="#listtab" data-toggle="tab" class=" btn-map">Regler</a></li>',
+                    '</ul>',
+                    '<div class="tab-content">',
+                        '<div class="tab-pane active" id="regionstab">',
+                            '<div class="loadingmessage"><img src="//artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
+                        '</div>',
+                        '<div class="tab-pane" id="listtab">Välj lista...</div>',
+                    '</div>',
                 '</div>',
                 '<div class="modal-footer">',
                     '<a href="#" class="btn btn-small pull-left btn-settings">Inställningar <i class="icon-cog"></i></a>',
@@ -320,6 +332,7 @@
                 // Save a stringifyed JSON-object that represent the selected sighting
                 try {
                     localStorage.setItem('sightingid-' + sightingid, JSON.stringify(selectedSighting));
+                    vm.firebase.storeSighting(selectedSighting, sightingid);
                 } catch (e) {
                     exception = e;
                 }
@@ -340,12 +353,75 @@
             });
         };
 
+        vm.utilities = {
+            getScript: function(url, success) {
+                var script = document.createElement('script');
+                script.src = url;
+                var head = document.getElementsByTagName('head')[0],
+                done = false;
+                script.onload = script.onreadystatechange = function () {
+                    if (!done && (!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')) {
+                        done = true;
+                        success();
+                        script.onload = script.onreadystatechange = null;
+                        head.removeChild(script);
+                    }
+                };
+                head.appendChild(script);
+            }
+        };
+
+        vm.firebase = {
+            enabled : ko.observable(false),
+            init: function() {
+                // Be sure to load  first
+                vm.utilities.getScript('//www.gstatic.com/firebasejs/4.10.0/firebase.js', function () {
+                    // Initialize Firebase
+                    var config = {
+                        apiKey: "AIzaSyCj5vVCvWRVPxl0_YJHmKaYKvoQJOTJ4WE",
+                        authDomain: "twitcher-app.firebaseapp.com",
+                        databaseURL: "https://twitcher-app.firebaseio.com",
+                        projectId: "twitcher-app",
+                        storageBucket: "twitcher-app.appspot.com",
+                        messagingSenderId: "698525556871"
+                    };
+                    firebase.initializeApp(config);
+                    console.log("Firebase ready!");
+
+                    // Show in GUI that Firebase is succesfully loaded
+                    // vm.Templates.modal.find("#listtab").append("<span class='label label-success'><i class='icon-check'></i> Firebase.js</span>");
+
+                    vm.firebase.enabled(true);
+                });
+            },
+            storeList: function(listData) {
+                firebase.database().ref(localStorage.getItem('twitch-useralias') + '/lists/' + listData.name + listData.year).set(listData);
+            },
+            storeSighting: function(sighting, sightingid) {
+                firebase.database().ref(localStorage.getItem('twitch-useralias') + '/sightings/' + sightingid).set(sighting);
+            },
+            storeAllSightings: function() {
+                for (var key in localStorage) {
+                    if (key.indexOf("sightingid") != "-1") {
+                        vm.firebase.storeSighting(localStorage.getItem(key), key);
+                    }
+                }
+            },
+            loadAllSightings: function() {
+                return firebase.database().ref(localStorage.getItem('twitch-useralias') + '/sightings/').once('value').then(function(snapshot) {
+                    console.log(snapshot.val());
+                });
+            }
+        }
+
         vm.listModule = {
             Templates: {
                 searchForm: $([
                     '<form>',
                         '<div class="form-group">',
-                            '<input type="text" class="form-control" id="searchAreaName" placeholder="Sök kommun/lokal/landskap">',
+                            '<input type="text" class="form-control" id="searchAreaName" placeholder="Sök kommun/lokal/landskap"><br>',
+                            '<button class="btn btn-primary" type="button" id="saveAllSightingsToFirebase">Spara alla</button>',
+                            '<button class="btn btn-primary" type="button" id="getAllSightingsFromFirebase">Visa alla</button>',
                         '</div>',
                     '</form>'
                 ].join("\n"))
@@ -373,40 +449,35 @@
                     var speciesArray = $(data).find("span[data-taxonid]").map(function() {
                         return $(this).data("taxonid");
                     }).get();
-                    console.log({
+                    var listData = {
                         type: item.IsMunicipality ? "Kommun" : item.IsRegion ? "Landskap" : "Lokal",
                         name: item.Name,
                         year: year,
                         species: speciesArray,
                         speciesCount: speciesArray.length,
                         lastUpdated: Date.now()
-                    });
+                    }
+                    console.log(listData);
+                    vm.firebase.storeList(listData);
                 });
             },
             addList: function(item) {
                 console.log(item);
                 vm.listModule.fetchList(item, '');
             },
-            getScript: function(url, success) {
-                var script = document.createElement('script');
-                script.src = url;
-                var head = document.getElementsByTagName('head')[0],
-                done = false;
-                script.onload = script.onreadystatechange = function () {
-                    if (!done && (!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')) {
-                        done = true;
-                        success();
-                        script.onload = script.onreadystatechange = null;
-                        head.removeChild(script);
-                    }
-                };
-                head.appendChild(script);
-            },
             autoComplete: function() {
-                console.log("WTF!");
                 var xhrRegionForList;
                 // Create the form and add autocmplete
-                vm.Templates.modal.find(".modal-body").append(vm.listModule.Templates.searchForm).find("#searchAreaName").keypress(function (event) {
+                vm.Templates.modal.find("#listtab").append(vm.listModule.Templates.searchForm).find("#saveAllSightingsToFirebase").click(function(event) {
+                    event.preventDefault();
+                    vm.firebase.storeAllSightings();
+                }).end()
+                .find("#getAllSightingsFromFirebase").click(function(event) {
+                    event.preventDefault();
+                    var sightings = vm.firebase.loadAllSightings();
+                    vm.Templates.modal.find("#listtab").append('<div class="well well-small"><h3>Från firebase!</h3>' + sightings + '</div>');
+                }).end()
+                .find("#searchAreaName").keypress(function (event) {
                     if (event.keyCode == 13) { event.preventDefault(); }
                     if (xhrRegionForList) { xhrRegionForList.abort(); }
                 }).autocomplete({
@@ -449,7 +520,9 @@
             },
             init: function() {
                 // Be sure to load lodash first
-                vm.listModule.getScript('//cdnjs.cloudflare.com/ajax/libs/lodash.js/1.3.1/lodash.min.js', function () {
+                vm.utilities.getScript('//cdnjs.cloudflare.com/ajax/libs/lodash.js/1.3.1/lodash.min.js', function () {
+                    // Show in GUI that lodash is succesfully loaded
+                    // vm.Templates.modal.find("#listtab").append("<span class='label label-success'><i class='icon-check'></i> Lodash.js</span>");
                     // Attach the search form
                     vm.listModule.autoComplete();
                 });
@@ -475,6 +548,7 @@
             });
 
             vm.listModule.init();
+            vm.firebase.init();
 
             // No user - show settings
             if (localStorage.getItem('twitch-useralias') === null) {
