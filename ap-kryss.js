@@ -395,10 +395,10 @@
                 });
             },
             storeList: function(listData) {
-                firebase.database().ref(localStorage.getItem('twitch-useralias') + '/lists/' + listData.name + listData.year).set(listData);
+                firebase.database().ref(localStorage.getItem('twitch-useralias').toLowerCase() + '/lists/' + listData.name + listData.year).set(listData);
             },
             storeSighting: function(sighting, sightingid) {
-                firebase.database().ref(localStorage.getItem('twitch-useralias') + '/sightings/' + sightingid).set(sighting);
+                firebase.database().ref(localStorage.getItem('twitch-useralias').toLowerCase() + '/sightings/' + sightingid).set(sighting);
             },
             storeAllSightings: function() {
                 for (var key in localStorage) {
@@ -408,7 +408,7 @@
                 }
             },
             loadAllSightings: function() {
-                return firebase.database().ref(localStorage.getItem('twitch-useralias') + '/sightings/').once('value').then(function(snapshot) {
+                return firebase.database().ref(localStorage.getItem('twitch-useralias').toLowerCase() + '/sightings/').once('value').then(function(snapshot) {
                     console.log(snapshot.val());
                 });
             }
