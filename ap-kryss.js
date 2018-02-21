@@ -85,7 +85,7 @@
                         '<li><a href="#listtab" data-toggle="tab" class=" btn-map">Regler</a></li>',
                     '</ul>',
                     '<div class="tab-content">',
-                        '<div class="tab-pane active" id="regionstab">',
+                        '<div class="tab-pane" id="regionstab">',
                             '<div class="loadingmessage"><img src="//artportalen.se/Content/Images/ajax-loader-circle.gif"> Letar kryss...</div>',
                         '</div>',
                         '<div class="tab-pane" id="listtab">Välj lista...</div>',
@@ -354,6 +354,10 @@
         };
 
         vm.utilities = {
+            debug: true,
+            log: function(message) {
+                if (vm.utilities.debug) console.log(message);
+            },
             getScript: function(url, success) {
                 var script = document.createElement('script');
                 script.src = url;
@@ -368,8 +372,79 @@
                     }
                 };
                 head.appendChild(script);
+            },
+            indicateChange: function($element) {
+                $element.stop().css("background-color", "#FFFF9C").animate({ backgroundColor: "#FFFFFF"}, 1500);
+            },
+            sighting: {
+                getSightingById: function(sightingId) {
+                    $.get("//artportalen.se/Sighting/" + sightingId + "?t=" + new Date().getTime(), function( data ) {
+                        vm.Templates.modal.find(".loadingmessage").hide();
+                        var sightingObject = vm.utilities.sighting.createSightingObject($(data), sightingId);
+                        vm.utilities.log(sightingObject);
+                    });
+                },
+                scrape: {
+                    SightingPresentation: function(row) {
+                        return [
+                            row.find("td.label:contains(Antal)").siblings("td.data").text(),
+                            row.find("td.label:contains(Kön)").siblings("td.data").text(),
+                            row.find("td.label:contains(Ålder)").siblings("td.data").text(),
+                            row.find("td.label:contains(Aktivitet)").siblings("td.data").text()
+                        ].join(" ");
+                    },
+                    Site: function(row, index, trueForData) {
+                        var scrape = row.find("[data-siteid]:eq(" + index + ")") || "";
+                        return trueForData ? scrape.data("siteid") : scrape.text();
+                    },
+                    ByLabel: function(row, label) {
+                        return row.find("td.label:contains(" + label + ")").siblings("td.data").text();
+                    },
+                    TaxonName: function(row, index) {
+                        return row.find("[data-taxonid]:eq(" + index + ")").text();
+                    },
+                    Time: function(row) {
+                        return [
+                            row.find("td.label:contains(Startdatum)").siblings("td.data span:eq(1)").text(),
+                            row.find("td.label:contains(Slutdatum)").siblings("td.data span:eq(1)").text()
+                        ].join(" - ");
+                    }
+                },
+                createSightingObject: function(row, sightinId) {
+                    return {
+                        TodaysSightingId : sightinId,
+                        SightingId : sightinId,
+                        TriggeredValidationLevel : 0,
+                        TaxonId : row.find("[data-taxonid]:eq(0)").data("taxonid"),
+                        TaxonSpeciesGroupId : 0,
+                        SightingPresentation : vm.utilities.sighting.scrape.SightingPresentation(row),
+                        SitePresentation : vm.utilities.sighting.scrape.Site(row, 0, false) + ', ' + vm.utilities.sighting.scrape.Site(row, 1, false),
+                        SiteId : vm.utilities.sighting.scrape.Site(row, 0, true),
+                        SiteName : vm.utilities.sighting.scrape.Site(row, 0, false),
+                        SiteParentId : vm.utilities.sighting.scrape.Site(row, 1, true),
+                        SiteParentName : vm.utilities.sighting.scrape.Site(row, 1, false),
+                        Observers : row.find("#coobservers").html(),
+                        PublicCommentId : 0,
+                        TimePresentation : vm.utilities.sighting.scrape.Time(row),
+                        NoteOfInterest : !!row.find("td.label:contains(Intressant kommentar)").length,
+                        Unspontaneous : false,
+                        UnsureDetermination : false,
+                        HasImages : !!row.find("a[href='#SightingDetailImages'] em").text(), //
+                        RegionName : vm.utilities.sighting.scrape.ByLabel(row, "Landskap"),
+                        RegionShortName : vm.utilities.sighting.scrape.ByLabel(row, "Landskap"),
+                        RegionalSightingState : 1,
+                        ObservedDatePresentation : vm.utilities.sighting.scrape.ByLabel(row, "Startdatum"),
+                        PublishedDatePresentation : vm.utilities.sighting.scrape.ByLabel(row, "Startdatum"),
+                        TaxonScientificName : vm.utilities.sighting.scrape.TaxonName(row, 1),
+                        TaxonName : vm.utilities.sighting.scrape.TaxonName(row, 0),
+                        Startdate : vm.utilities.sighting.scrape.ByLabel(row, "Startdatum"),
+                        PublicComment : vm.utilities.sighting.scrape.ByLabel(row, "Kommentar")
+                    };
+                }
             }
         };
+
+        
 
         vm.firebase = {
             enabled : ko.observable(false),
@@ -386,7 +461,7 @@
                         messagingSenderId: "698525556871"
                     };
                     firebase.initializeApp(config);
-                    console.log("Firebase ready!");
+                    vm.utilities.log("Firebase ready!");
 
                     // Show in GUI that Firebase is succesfully loaded
                     // vm.Templates.modal.find("#listtab").append("<span class='label label-success'><i class='icon-check'></i> Firebase.js</span>");
@@ -407,9 +482,25 @@
                     }
                 }
             },
-            loadAllSightings: function() {
-                return firebase.database().ref(localStorage.getItem('twitch-useralias').toLowerCase() + '/sightings/').once('value').then(function(snapshot) {
-                    console.log(snapshot.val());
+            loadAllSightings: function(callbackFunction) {
+                firebase.database().ref(localStorage.getItem('twitch-useralias').toLowerCase() + '/sightings/').once('value').then(function(snapshot) {
+                    callbackFunction(snapshot.val());
+                });
+            },
+            renderAllSightings: function() {
+                vm.firebase.loadAllSightings(function(sightings) {
+                    var sightingList = '<ul>'
+                    for (var key in sightings) {
+                        var sighting = JSON.parse(sightings[key]);
+                        sightingList += '<li><b>' + sighting.TaxonName + '</b> - ' + sighting.SitePresentation + ' (<i>' + sighting.ObservedDatePresentation + '</i>)</li>';
+                    }
+                    sightingList += '</ul>';
+
+                    var displaySightingArea = vm.Templates.modal.find("#listtab").find("#displaySightingArea").length 
+                                        || $("<div id='displaySightingArea' class='well well-small'/>").appendTo(vm.Templates.modal.find("#listtab"));
+                    displaySightingArea.empty().append('<h3>Från firebase!</h3>' + sightingList);
+
+                    vm.utilities.indicateChange(displaySightingArea);
                 });
             }
         }
@@ -457,12 +548,14 @@
                         speciesCount: speciesArray.length,
                         lastUpdated: Date.now()
                     }
-                    console.log(listData);
+                    vm.utilities.log("vm.listModule.fetchList();");
+                    vm.utilities.log(listData);
                     vm.firebase.storeList(listData);
                 });
             },
             addList: function(item) {
-                console.log(item);
+                vm.utilities.log("vm.listModule.addList();");
+                vm.utilities.log(item);
                 vm.listModule.fetchList(item, '');
             },
             autoComplete: function() {
@@ -474,8 +567,7 @@
                 }).end()
                 .find("#getAllSightingsFromFirebase").click(function(event) {
                     event.preventDefault();
-                    var sightings = vm.firebase.loadAllSightings();
-                    vm.Templates.modal.find("#listtab").append('<div class="well well-small"><h3>Från firebase!</h3>' + sightings + '</div>');
+                    vm.firebase.renderAllSightings();
                 }).end()
                 .find("#searchAreaName").keypress(function (event) {
                     if (event.keyCode == 13) { event.preventDefault(); }
@@ -549,6 +641,13 @@
 
             vm.listModule.init();
             vm.firebase.init();
+
+            //testdata
+            /*
+            vm.utilities.sighting.getSightingById(69648966); // Med intressant notering
+            vm.utilities.sighting.getSightingById(69576435); // Med media + intressant notering
+            vm.utilities.sighting.getSightingById(69671300); // Plain stuff
+            */
 
             // No user - show settings
             if (localStorage.getItem('twitch-useralias') === null) {
