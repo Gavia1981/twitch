@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Jämför kameror 2018</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.3.0/dist/semantic.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+    <style type="text/css">
+    <!--
+        body { font-family: 'Open Sans', sans-serif; padding:50px 30px; }
+        img.camerabody { max-height:150px;}
+        .subitem { padding-left:2em !important; }
+
+    -->
+    </style>
+</head>
+<body>
+<h1 class="ui icon header center aligned">
+    <i class="icon balance scale"></i>
+  <div class="content">
+    Fullformat 2018
+    <div class="sub header">Jämför priser, vikt och egenskaper mm</div>
+  </div>
+</h1>
+<table class="ui compact celled definition table">
+  <thead>
+    <tr>
+        <th></th>
+        <!-- ko foreach: cameras -->
+        <th class="center aligned">
+            <h3>
+                <span data-bind="text: name"></span> <br>
+                <small>
+                <!-- ko foreach: new Array($data.stars) -->
+                <i class="icon star yellow"></i>
+                <!-- /ko -->
+                </small>
+            </h3>
+        </th>
+        <!-- /ko -->
+  </tr>
+  </thead>
+  <tbody>
+    <tr>
+        <td><div class="ui teal ribbon label">Kameror</div></td>
+        <!-- ko foreach: cameras -->
+        <td class="center aligned"><a data-bind="attr: { 'href': url }" target="_blank"><img data-bind="attr: { 'src': image }" class="camerabody"></a></td>
+        <!-- /ko -->
+    </tr>
+    <tr>
+        <td>Pris</td>
+        <!-- ko foreach: cameras -->
+        <td class="center aligned"><span data-bind="text: $root.utilities.showPrice(price()) "></span></td>
+        <!-- /ko -->
+    </tr>
+    <tr>
+        <td>Batterikapacitet</td>
+        <!-- ko foreach: cameras -->
+        <td class="center aligned" data-bind="text: batteryCapacity + ' bilder' "></td>
+        <!-- /ko -->
+    </tr>
+    <tr class="top aligned">
+        <td>Plus/minus</td>
+        <!-- ko foreach: cameras -->
+        <td class="center aligned">
+            <div class="ui list">
+                <div class="item"><b><i class="icon plus"></i> Plus</b></div>
+                <!-- ko foreach: pros -->
+                <div class="item" data-bind="text: $data"></div>
+                <!-- /ko -->
+                <div class="item"><b><i class="icon minus"></i> Minus</b></div>
+                <!-- ko foreach: cons -->
+                <div class="item" data-bind="text: $data"></div>
+                <!-- /ko -->
+            </div>
+        </td>
+        <!-- /ko -->
+    </tr>
+    <!-- ko foreach: lensCategory -->
+    <tr>
+        <td><h3 data-bind="text: $data"></h3></td>
+        <!-- ko foreach: $parent.cameras -->
+        <td class="center aligned">
+            <a  data-bind="text: lenses[$parentContext.$index()].name, attr: { 'href' : lenses[$parentContext.$index()].url } "></a>
+            
+        </td>
+        <!-- /ko -->
+    </tr>
+    <tr>
+        <td class="subitem">Pris</td>
+        <!-- ko foreach: $parent.cameras -->
+        <td class="center aligned">
+            <span data-bind="text: $root.utilities.showPrice(lenses[$parentContext.$index()].price)"></span>
+            <button class="ui button icon right floated" data-bind="click: function() { $root.utilities.setSelected(lenses[$parentContext.$index()]) }, css: { 'green': lenses[$parentContext.$index()].selected(), 'basic': !lenses[$parentContext.$index()].selected()  }">
+                <i class="check square icon" data-bind="css : { 'outline':  !lenses[$parentContext.$index()].selected() }"></i>
+            </button>
+        </td>
+        <!-- /ko -->
+    </tr>
+    <tr>
+        <td class="subitem">Vikt</td>
+        <!-- ko foreach: $parent.cameras -->
+        <td class="center aligned" data-bind="text: $root.utilities.showWeight(lenses[$parentContext.$index()].weight) "></td>
+        <!-- /ko -->
+    </tr>
+    <!-- /ko -->
+    <tr class="top aligned">
+        <td><h3>Inkluderade tillbehör</h3></td>
+        <!-- ko foreach: cameras -->
+        <td class="center aligned">
+            <div class="ui list">
+                <!-- ko foreach: accessories -->
+                <div class="item"><a data-bind="attr: { 'href': url }, text: name"></a> (<span data-bind="text: $root.utilities.showPrice(price)"></span>)</div>
+                <!-- /ko -->
+            </div>
+        </td>
+        <!-- /ko -->
+    </tr>
+    </tbody>
+    <tfoot>
+    <tr>
+        <th>Summa ink/ekl moms</th>
+        <!-- ko foreach: cameras -->
+        <th class="center aligned"><h4><span data-bind="text: $root.utilities.calculatePrice($data, false)"></span> / <span data-bind="text: $root.utilities.calculatePrice($data, true)"></span></h4></th>
+        <!-- /ko -->
+    </tr>
+    <tr>
+        <th>Vikt totalt</th>
+        <!-- ko foreach: cameras -->
+        <th class="center aligned"><span data-bind="text: $root.utilities.calculateWeight($data)"></span></span></th>
+        <!-- /ko -->
+    </tr>
+    </tfoot>
+</table>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.3.0/dist/semantic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
+    <script type="text/javascript">
+    <!--
+    $(document).ready(function() {
+        function ViewModel() {
+
+            var vm = this; 
+
+            vm.utilities = {
+                showPrice: function(price) {
+                    return vm.utilities.numberWithSpaces(parseInt(price)) + ' kr';
+                },
+                calculatePrice: function(obj, moms) {
+                    var tot = parseInt(obj.price());
+                    for (var i = 0; i < obj.lenses.length; i++) {
+                        if (obj.lenses[i].selected()){
+                            tot += parseInt(obj.lenses[i].price);
+                        }            
+                    }
+                    for (var i = 0; i < obj.accessories.length; i++) {
+                        console.log(obj.accessories[i].price + obj.accessories[i].name);
+                        tot += parseInt(obj.accessories[i].price);       
+                    }
+                    if (moms) {
+                        tot = tot / 1.25;
+                    }
+                    return vm.utilities.showPrice(tot);
+                },
+                numberWithSpaces: function(x) {
+                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                },
+                showWeight: function(weight) {
+                    return weight + ' gr';
+                },
+                calculateWeight: function(obj) {
+                    var tot = parseInt(obj.weight);
+                    for (var i = 0; i < obj.lenses.length; i++) {
+                        if (obj.lenses[i].selected()){
+                            tot += parseInt(obj.lenses[i].weight);
+                        }            
+                    }
+                    return vm.utilities.showWeight(tot);
+                },
+                setSelected: function(obj) {
+                    obj.selected(!obj.selected());
+                }
+            }
+
+            vm.cameras = ko.observableArray([{
+                name: "Nikon D850",
+                stars: 5,
+                url: "https://www.cyberphoto.se/info.php?article=nid850",
+                image: "https://www.cyberphoto.se/nikon/digital/d850/nid850_body_front.jpg",
+                pros: ["Bästa sensorn", "Vinklad skärm", "Robust/vädertätad", "Bäst objektivutbud"],
+                cons: ["Dyr"],
+                weight: "915",
+                sensorsize: "45,7",
+                batteryCapacity: "1840",
+                price: ko.observable("39290"),
+                lenses : [{
+                    type : "Vidvinkel (zoom)",
+                    name: "Sigma 14-24/2,8 DG HSM Art", 
+                    url: "https://www.cyberphoto.se/info.php?article=1424artni",
+                    img: "https://www.cyberphoto.se/sigma/1424_art_1.jpg",
+                    selected: ko.observable(false),
+                    weight: "1150",
+                    price: "13990"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Sigma 14/1,8 DG HSM Art", 
+                    url: "https://www.cyberphoto.se/info.php?article=si14artni",
+                    img: "https://www.cyberphoto.se/sigma/14_18art.jpg",
+                    selected: ko.observable(false),
+                    weight: "1170",
+                    price: "14490"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Irix 15/2,4 Blackstone", 
+                    url: "https://www.cyberphoto.se/info.php?article=irix15blackni",
+                    img: "https://www.cyberphoto.se/irix/irix15_blackstone.jpg",
+                    selected: ko.observable(true),
+                    weight: "653",
+                    price: "6490"
+                }/*,{
+                    type : "Zoom (70-200 mm)",
+                    name: "Nikon AF-S 70-200/2,8E FL-ED VR", 
+                    url: "https://www.cyberphoto.se/info.php?article=AFS70200EFLEDVR",
+                    img: "https://www.cyberphoto.se/nikon/nikkor/AFS70200EFLEDVR_2.jpg",
+                    selected: ko.observable(false),
+                    weight: "1430",
+                    price: "26990"
+                }*/,{
+                    type : "Zoom (70-200 mm)",
+                    name: "Sigma EX 70-200/2,8 APO DG HSM OS", 
+                    url: "https://www.cyberphoto.se/info.php?article=si70200osN",
+                    img: "https://www.cyberphoto.se/sigma/70-200os.jpg",
+                    selected: ko.observable(true),
+                    weight: "1430",
+                    price: "9490"
+                }],
+                accessories: [
+                    { 
+                        name: "Sony XQD 128GB G 400 MB/s",
+                        url: "https://www.cyberphoto.se/info.php?article=xqdg128",
+                        price: "2690"
+                    }, {
+                        name : "Lexar SDXC Professional 1000X 64GB UHS-II, 150MB/s",
+                        url: "https://www.cyberphoto.se/info.php?article=LSD64GCRBEU1000&infArtnr=nid850&flik=sc3",
+                        price: "699"
+                    }
+                ]
+            },{
+                name: "Pentax K-1 Mark II kamerahus",
+                stars: 4,
+                url: "https://www.cyberphoto.se/info.php?article=K-1mk2",
+                image: "https://www.cyberphoto.se/pentax/digital/k1mk2/k1mk2_body_front.jpg",
+                pros: ["Robust/vädertätad", "Astrotrace", "Vinklad skärm", "Mkt för pengarna", "Högupplöst", "Stödljus på kameran för nattfoto"],
+                cons: ["Dåligt objektivutbud!", "Batterikapacitet"],
+                weight: "915",
+                sensorsize: "36,4",
+                batteryCapacity: "670",
+                price: ko.observable("20890"),
+                lenses : [{
+                    type : "Vidvinkel (zoom)",
+                    name: "Pentax D FA 15-30/2,8 ED SDM WR", 
+                    url: "https://www.cyberphoto.se/info.php?article=dfa15-30&infArtnr=K-1mk2&flik=sc6",
+                    img: "https://www.cyberphoto.se/bilder/P1530.png",
+                    selected: ko.observable(false),
+                    weight: "1040",
+                    price: "18490"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Laowa 12/2,8 Zero-D", 
+                    url: "https://www.cyberphoto.se/info.php?article=LA12Pe",
+                    img: "https://www.cyberphoto.se/laowa/la12_1.jpg",
+                    selected: ko.observable(false),
+                    weight: "609",
+                    price: "11390"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Irix 15/2,4 Blackstone", 
+                    url: "https://www.cyberphoto.se/info.php?article=irix15blackpe",
+                    img: "https://www.cyberphoto.se/irix/irix15_blackstone.jpg",
+                    selected: ko.observable(true),
+                    weight: "609",
+                    price: "6490"
+                },{
+                    type : "Zoom (70-200 mm)",
+                    name: "Pentax D FA* 70-200/2,8 ED DC AW", 
+                    url: "https://www.cyberphoto.se/info.php?article=dfa70200",
+                    img: "https://www.cyberphoto.se/pentax/optik/dfa70200.jpg",
+                    selected: ko.observable(false),
+                    weight: "2020",
+                    price: "22490"
+                }],
+                accessories: [
+                    { 
+                        name : "Lexar SDXC Professional 1000X 64GB UHS-II, 150MB/s",
+                        url: "https://www.cyberphoto.se/info.php?article=LSD64GCRBEU1000&infArtnr=nid850&flik=sc3",
+                        price: "699"
+                    }, {
+                        name : "Lexar SDXC Professional 1000X 64GB UHS-II, 150MB/s",
+                        url: "https://www.cyberphoto.se/info.php?article=LSD64GCRBEU1000&infArtnr=nid850&flik=sc3",
+                        price: "699"
+                    }
+                ]
+            },{
+                name: "Sony Alpha 7R III",
+                stars: 3,
+                url: "https://www.cyberphoto.se/info.php?article=A7Rmk3",
+                image: "https://www.cyberphoto.se/sony/a7rmk3/a7rmk3_front.jpg",
+                pros: ["Storlek och vikt!", "Vinklad skärm", "Video!"],
+                cons: ["Sämre vädertätning", "Batterikapacitet", "Erkänt dålig support"],
+                weight: "657",
+                sensorsize: "42,4",
+                batteryCapacity: "530",
+                price: ko.observable("34990"),
+                lenses : [{
+                    type : "Vidvinkel (zoom)",
+                    name: "Sony FE 16-35/2,8 GM", 
+                    url: "https://www.cyberphoto.se/info.php?article=FE1635GM",
+                    img: "https://www.cyberphoto.se/sony/optik/fe1635_1.jpg",
+                    selected: ko.observable(false),
+                    weight: "680",
+                    price: "27290"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Laowa 12/2,8 Zero-D", 
+                    url: "https://www.cyberphoto.se/info.php?article=LA12So",
+                    img: "https://www.cyberphoto.se/laowa/la12_1.jpg",
+                    selected: ko.observable(false),
+                    weight: "609",
+                    price: "11390"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Samyang AF 14/2,8 ED AS IF UMC FE",
+                    url: "https://www.cyberphoto.se/info.php?article=14mmfe",
+                    img: "https://www.cyberphoto.se/samyang/14mmfe_cad.jpg",
+                    selected: ko.observable(true),
+                    weight: "505",
+                    price: "6790"
+                },{
+                    type : "Zoom (70-200 mm)",
+                    name: "Sony FE 70-200/2,8 GM OSS", 
+                    url: "https://www.cyberphoto.se/info.php?article=SEL70200GM&infArtnr=A7Rmk3&flik=sc6",
+                    img: "https://www.cyberphoto.se/sony/optik/fe70200gm.jpg",
+                    selected: ko.observable(false),
+                    weight: "1480",
+                    price: "27790"
+                }],
+                accessories: [
+                    { 
+                        name: "Sony XQD 128GB G 400 MB/s",
+                        url: "https://www.cyberphoto.se/info.php?article=xqdg128",
+                        price: "2690"
+                    }, {
+                        name : "Lexar SDXC Professional 1000X 64GB UHS-II, 150MB/s",
+                        url: "https://www.cyberphoto.se/info.php?article=LSD64GCRBEU1000&infArtnr=nid850&flik=sc3",
+                        price: "699"
+                    }
+                ]
+            },{
+                name: "Nikon D810",
+                stars: 2,
+                url: "https://www.cyberphoto.se/info.php?article=nid810",
+                image: "https://www.cyberphoto.se/nikon/digital/d810/nid810_body_front.jpg",
+                pros: ["Bra sensor för astrofoto"],
+                cons: ["Ej vinklad skärm!", "Gammal teknik"],
+                weight: "880",
+                sensorsize: "36,3",
+                batteryCapacity: "1200",
+                price: ko.observable("27490"),
+                lenses : [{
+                    type : "Vidvinkel (zoom)",
+                    name: "Sigma 14-24/2,8 DG HSM Art", 
+                    url: "https://www.cyberphoto.se/info.php?article=1424artni",
+                    img: "https://www.cyberphoto.se/sigma/1424_art_1.jpg",
+                    selected: ko.observable(false),
+                    weight: "1150",
+                    price: "13990"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Sigma 14/1,8 DG HSM Art", 
+                    url: "https://www.cyberphoto.se/info.php?article=si14artni",
+                    img: "https://www.cyberphoto.se/sigma/14_18art.jpg",
+                    selected: ko.observable(false),
+                    weight: "1170",
+                    price: "14490"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Irix 15/2,4 Blackstone", 
+                    url: "https://www.cyberphoto.se/info.php?article=irix15blackni",
+                    img: "https://www.cyberphoto.se/irix/irix15_blackstone.jpg",
+                    selected: ko.observable(true),
+                    weight: "653",
+                    price: "6490"
+                },{
+                    type : "Zoom (70-200 mm)",
+                    name: "Nikon AF-S 70-200/2,8E FL-ED VR", 
+                    url: "https://www.cyberphoto.se/info.php?article=AFS70200EFLEDVR",
+                    img: "https://www.cyberphoto.se/nikon/nikkor/AFS70200EFLEDVR_2.jpg",
+                    selected: ko.observable(false),
+                    weight: "1430",
+                    price: "26990"
+                }],
+                accessories: [
+                    { 
+                        name: "SanDisk CompactFlash Extreme PRO, 128GB, UDMA 7, 160MB/s",
+                        url: "https://www.cyberphoto.se/info.php?article=CF128GBExtremePro160mb&infArtnr=nid810&flik=sc3",
+                        price: "1590"
+                    }
+                ]
+
+                
+            },{
+                name: "Sony Alpha 7 III",
+                stars: 1,
+                url: "https://www.cyberphoto.se/info.php?article=A7mk3",
+                image: "https://www.cyberphoto.se/sony/a7mk3/a7mk3_body_front.jpg",
+                pros: ["Storlek och vikt!", "Vinklad skärm", "Bra på höga ISO", "Video!"],
+                cons: ["Lägre upplösning", "Sämre vädertätning", "Erkänt dålig support"],
+                weight: "650",
+                sensorsize: "24,2",
+                batteryCapacity: "710",
+                price: ko.observable("23990"),
+                lenses : [{
+                    type : "Vidvinkel (zoom)",
+                    name: "Sony FE 16-35/2,8 GM", 
+                    url: "https://www.cyberphoto.se/info.php?article=FE1635GM",
+                    img: "https://www.cyberphoto.se/sony/optik/fe1635_1.jpg",
+                    selected: ko.observable(false),
+                    weight: "680",
+                    price: "27290"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Laowa 12/2,8 Zero-D", 
+                    url: "https://www.cyberphoto.se/info.php?article=LA12So",
+                    img: "https://www.cyberphoto.se/laowa/la12_1.jpg",
+                    selected: ko.observable(false),
+                    weight: "609",
+                    price: "11390"
+                },{
+                    type : "Vidvinkel (fast)",
+                    name: "Samyang AF 14/2,8 ED AS IF UMC FE",
+                    url: "https://www.cyberphoto.se/info.php?article=14mmfe",
+                    img: "https://www.cyberphoto.se/samyang/14mmfe_cad.jpg",
+                    selected: ko.observable(true),
+                    weight: "505",
+                    price: "6790"
+                },{
+                    type : "Zoom (70-200 mm)",
+                    name: "Sony FE 70-200/2,8 GM OSS", 
+                    url: "https://www.cyberphoto.se/info.php?article=SEL70200GM&infArtnr=A7Rmk3&flik=sc6",
+                    img: "https://www.cyberphoto.se/sony/optik/fe70200gm.jpg",
+                    selected: ko.observable(false),
+                    weight: "1480",
+                    price: "27790"
+                }],
+                accessories: [
+                    { 
+                        name: "Sony XQD 128GB G 400 MB/s",
+                        url: "https://www.cyberphoto.se/info.php?article=xqdg128",
+                        price: "2690"
+                    }, {
+                        name : "Lexar SDXC Professional 1000X 64GB UHS-II, 150MB/s",
+                        url: "https://www.cyberphoto.se/info.php?article=LSD64GCRBEU1000&infArtnr=nid850&flik=sc3",
+                        price: "699"
+                    }
+                ]
+            }]);
+
+            vm.lensCategory = ko.observableArray(["Vidvinkel (zoom)", "Vidvinkel (fast)", "Vidvinkel (fast)", "Telezoom (70-200)" ]);
+            vm.lensCategoryProperties = ko.observableArray([{
+                name : "Pris",
+                property: 'price'
+            }]);
+
+        }
+
+        window.viewModel = new ViewModel();
+        ko.applyBindings(window.viewModel, document.body);
+    });
+    -->
+    </script>
+</body>
+</html>
+
+
+
+
+
+
