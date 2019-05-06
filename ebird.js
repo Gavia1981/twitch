@@ -2,7 +2,7 @@
 
 	var vm = this;
 
-	vm.debug = true;
+	vm.debug = false;
 	vm.log = function(message) {
 		if (vm.debug) console.log(message);
 	};
