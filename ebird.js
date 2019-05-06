@@ -2,7 +2,7 @@
 
 	var vm = this;
 
-	vm.debug = false;
+	vm.debug = true;
 	vm.log = function(message) {
 		if (vm.debug) console.log(message);
 	};
@@ -63,8 +63,9 @@
 
 	vm.setEndDate = function(startDate) {
 		vm.log("vm.setEndDate startDate = " + startDate);
-		if (!$("dt:contains('Duration:')").length) return startDate;
-		var duration = $("dt:contains('Duration:')").siblings("dd").text();
+		if (!$("time:eq(1) span.Badge").length) return startDate;
+		var duration = $("time:eq(1) span.Badge").prop("title");
+		vm.log("duration", duration);
 		var matchHours = /(\d{1,2})\s[hour\(s\)]/g.exec(duration);
 		if (matchHours != null) {
 		    startDate = addHours(startDate, matchHours[1]); vm.log("vm.setEndDate added (" + matchHours[1] + ") hours. " + startDate);
@@ -101,7 +102,7 @@
 	};
 
 	vm.getSite = function() {
-		var rawSiteName = $("h5.obs-loc").clone().children().remove().end().text().replace(/\s\s+/g, ' ');
+		var rawSiteName = $("h6:contains('Location')").closest("div").find("span").clone().text().replace(/\s\s+/g, ' ');
 		var findCoordinate = /(\d+\,\d+)(\,|x)(\d+\,\d+)/gi.exec(rawSiteName);
 		var coordinates = findCoordinate == null ? ["&nbsp;", "&nbsp;"] : [findCoordinate[1].replace(/,/g, "."), findCoordinate[3].replace(/,/g, ".")];
 		var accuracy = findCoordinate == null ? "&nbsp;" : 250;
@@ -118,7 +119,7 @@
 	};
 
 	vm.getDateTime = function() {
-		var sightingDate = new Date($("h5.rep-obs-date").clone().children().remove().end().text());
+		var sightingDate = new Date($("time:eq(0)").clone().attr('datetime'));
 		var startDate = sightingDate.toISOString().slice(0,10);
 		var endDate = vm.setEndDate(sightingDate);
 		var startTime = sightingDate.toTimeString().split(' ')[0];
@@ -151,12 +152,12 @@
 		var site = vm.getSite();
 		var dateTime = vm.getDateTime();
 
-		$("#spp-list tr.spp-entry").each(function() {
+		$("#list li").each(function() {
 			var $row = $(this);
 			sightingRows.push([
 				"<tr>",
-					"<td>" + vm.stripSpeciesName($row.find(".se-name").text()) + "</td>", 
-					"<td>" + $row.find(".se-count").text() + "</td>", 
+					"<td>" + vm.stripSpeciesName($row.find("h3").text()) + "</td>", 
+					"<td>" + $row.find(".Observation-numberObserved").clone().find(".is-visuallyHidden").remove().end().text() + "</td>", 
 					"<td>&nbsp;</td>", 
 					"<td>&nbsp;</td>", 
 					"<td>&nbsp;</td>", 
@@ -169,7 +170,7 @@
 					"<td>" + dateTime.startTime + "</td>", 
 					"<td>" + dateTime.endDate + "</td>", 
 					"<td>" + dateTime.endTime + "</td>", 
-					"<td>" + $row.find(".obs-comments").text() + "</td>", 
+					"<td>" + $row.find(".Observation-comments").clone().find(".is-visuallyHidden").remove().end().text() + "</td>", 
 				"</tr>"
 				].join(''));
 		});
