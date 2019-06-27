@@ -211,7 +211,7 @@
         vm.getListUrl = function() {
             return [
                 "//artportalen.se/List/Top/Species/F%C3%A5glar/Total", 
-                window.viewModel.selectedAreaIsMunicipality() ? "Kommun" : "Landskap", 
+                window.viewModel.selectedAreaIsMunicipality() ? "Kommun" : "Provins", 
                 window.viewModel.selectedAreaName(), 
                 "AnySite/OrderByTaxon/Asc", 
                 localStorage.getItem("twitch-useralias")
