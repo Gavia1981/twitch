@@ -41,7 +41,7 @@
         totals: [],
         landskap: [{"Name":"Skåne","ShortName":"Sk"}, {"Name":"Blekinge","ShortName":"Bl"}, {"Name":"Småland","ShortName":"Sm"}, {"Name":"Öland","ShortName":"Öl"}, {"Name":"Gotland","ShortName":"Go"}, {"Name":"Halland","ShortName":"Ha"}, {"Name":"Bohuslän","ShortName":"Bo"}, {"Name":"Dalsland","ShortName":"Ds"}, {"Name":"Västergötland","ShortName":"Vg"}, {"Name":"Närke","ShortName":"Nä"}, {"Name":"Östergötland","ShortName":"Ög"}, {"Name":"Södermanland","ShortName":"Sö"}, {"Name":"Uppland","ShortName":"Up"}, {"Name":"Västmanland","ShortName":"Vs"}, {"Name":"Värmland","ShortName":"Vr"}, {"Name":"Dalarna","ShortName":"Dr"}, {"Name":"Gästrikland","ShortName":"Gä"}, {"Name":"Hälsingland","ShortName":"Hs"}, {"Name":"Medelpad","ShortName":"Me"}, {"Name":"Ångermanland","ShortName":"Ån"}, {"Name":"Västerbotten","ShortName":"Vb"}, {"Name":"Norrbotten","ShortName":"Nb"}, {"Name":"Härjedalen","ShortName":"Hr"}, {"Name":"Jämtland","ShortName":"Jä"}, {"Name":"Åsele lappmark","ShortName":"Ås"}, {"Name":"Lycksele lappmark","ShortName":"Ly"}, {"Name":"Pite lappmark","ShortName":"Pi"}, {"Name":"Lule lappmark","ShortName":"Lu"}, {"Name":"Torne lappmark","ShortName":"To"}],
         getListUrl: function(settings) {
-            return ['//artportalen.se/List/Top/Species/F%C3%A5glar/Total/Landskap', settings.regionName.Name, 'AnySite/OrderByDate/Desc', settings.userAlias].join('/') + "?t=" + new Date().getTime();
+            return ['//artportalen.se/List/Top/Species/F%C3%A5glar/Total/Provins', settings.regionName.Name, 'AnySite/OrderByDate/Desc', settings.userAlias].join('/') + "?t=" + new Date().getTime();
         },
         getTotals: function() {
             vm.lists.ajaxCounter++;
