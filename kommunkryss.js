@@ -95,18 +95,20 @@
         
         vm.regionData = {};
         vm.setRegionData = function(item) {
-            vm.regionData[item.regionName] = {
+            var data = {
                 antal : item.antal,
                 yearTicks : item.yearTicks,
                 updated : new Date(),
                 speciesList : item.speciesList
             };
+            vm.regionData[item.regionName] = data;
+            console.log(item, vm.regionData);
             localStorage.setItem(vm.selectedRegionType + "Data", JSON.stringify(vm.regionData));
-            return vm.regionData[item.regionName];
+            return data;
         };
 
         vm.getRegionData = function(namn) {
-            return vm.regionData ? vm.regionData[namn] : null;
+            return vm.regionData ? vm.regionData[namn] : '';
         };
 
         vm.missingSpeciesArray = [];
@@ -296,7 +298,7 @@
                     return $(this).data("taxonid");
                 }).get();
                 var item = { regionName : regionName, antal : vm.missingSpeciesArray.length, yearTicks : yearSum, speciesList : vm.missingSpeciesArray };
-                //vm.setRegionData(item);
+                vm.setRegionData(item);
                 vm.updateRegionSumma();
                 $(obj).replaceWith(vm.displayRegionItem(regionName, vm.setRegionData(item)));
                 vm.extractionActivated(false);
@@ -375,7 +377,7 @@
             } else {
                 vm.regions = ["Skåne", "Blekinge", "Småland", "Öland", "Gotland", "Halland", "Bohuslän", "Dalsland", "Västergötland", "Närke", "Östergötland", "Södermanland", "Uppland", "Västmanland", "Värmland", "Dalarna", "Gästrikland", "Hälsingland", "Medelpad", "Ångermanland", "Västerbotten", "Norrbotten", "Härjedalen", "Jämtland", "Åsele lappmark", "Lycksele lappmark", "Pite lappmark", "Lule lappmark", "Torne lappmark"]
             }
-            vm.regionData = JSON.parse(localStorage.getItem(vm.selectedRegionType + "Data"));
+            vm.regionData = JSON.parse(localStorage.getItem(vm.selectedRegionType + "Data")) || {};
             var html = [];
             $.each(vm.regions, function (index, value) {
                 var regionItem = vm.getRegionData(value);
